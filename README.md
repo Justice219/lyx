@@ -13,7 +13,7 @@ A full feature inclusive gmod lua library for creating content of all types. A G
 
 | Method | Params     | Description                |
 | :-------- | :------- | :------------------------- |
-| `lyx:ChatAddCommand()` | `string name, table settings` | Creates Chat Command with return function |
+| `lyx:ChatAddCommand()` | `string name, table settings` | Creates Chat Command with args and other inclusive features |
 
 #### Example
 
