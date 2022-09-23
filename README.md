@@ -7,13 +7,9 @@ A full feature inclusive gmod lua library for creating content of all types. A G
 
 - [@Justice](https://www.github.com/justice219)
 
-## Feature Example
+## Feature Examples
 
-#### Get all items
-
-```http
-  GET /api/items
-```
+# Chat Commands
 
 | Method | Params     | Description                |
 | :-------- | :------- | :------------------------- |
