@@ -1,0 +1,16 @@
+.____                     .____    ._____.                              
+|    |    ___.__.___  ___ |    |   |__\_ |______________ _______ ___.__.
+|    |   <   |  |\  \/  / |    |   |  || __ \_  __ \__  \\_  __ <   |  |
+|    |___ \___  | >    <  |    |___|  || \_\ \  | \// __ \|  | \/\___  |
+|_______ \/ ____|/__/\_ \ |_______ \__||___  /__|  (____  /__|   / ____|
+        \/\/           \/         \/       \/           \/       \/     
+
+Author  - Justice#4956
+Version - v1.0
+
+Lyx was created to do almost everything a lua programmer could want,
+easy command creation, npc creation, prop creation, boss spawning,
+player management, etc.
+
+This library was created for "Star Wars: Battlefield" and shouldnt be in
+the hands of anyone else :)
