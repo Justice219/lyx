@@ -14,17 +14,15 @@ Debug console commands for doing cool shit ig.
 ]]--
 
 concommand.Add("lyx_add_rank", function(ply, cmd, args)
-    if !lyx:CheckRank(ply) then return end
-    if !args[1] then return end
-
     lyx:AddRank(args[1])
+    lyx:Log("Added rank " .. args[1])
 end)
 
 concommand.Add("lyx_remove_rank", function(ply, cmd, args)
-    if !lyx:CheckRank(ply) then return end
     if !args[1] then return end
 
     lyx:RemoveRank(args[1])
+    lyx:Log("Removed rank " .. args[1])
 end)
 
 concommand.Add("lyx_npc_spawn", function(ply, cmd ,args)

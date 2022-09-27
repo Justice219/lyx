@@ -19,16 +19,18 @@ function lyx:AddRank(name)
     return end
 
     local ranks = lyx:JSONLoad("lyx_ranks.txt")
-    local tbl = {}
 
     if ranks then
-        tbl = ranks
+        lyx.ranks[name] = true
+        ranks[name] = true
+        lyx:JSONSave("lyx_ranks.txt", ranks)
+        lyx:Log("Added rank " .. name)
+    else
+        local tbl = {}
+        tbl[name] = true
+        lyx.ranks[name] = true
+        lyx:JSONSave("lyx_ranks.txt", tbl)
     end
-
-    lyx.ranks[name] = true
-    tbl[name] = true
-    lyx:JSONSave("lyx_ranks.txt", tbl)
-    lyx:Log("Added rank " .. name)
 end
 
 function lyx:RemoveRank(name)

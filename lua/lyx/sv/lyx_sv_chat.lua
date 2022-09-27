@@ -51,6 +51,7 @@ hook.Add("PlayerSay", "lyx_chat_commands", function(ply, text)
 
 end)
 
+-- CUSTOM COMMANDS!
 lyx:ChatAddCommand("test", {
     prefix = "!",
     func = function(ply, args)
