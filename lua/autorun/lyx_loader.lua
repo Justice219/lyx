@@ -48,9 +48,6 @@ local function load()
     local vguiFiles = file.Find("lyx/vgui/*.lua", "LUA")
     local thirdPartyFiles = file.Find("lyx/thirdparty/*.lua", "LUA")
 
-    for _, fl in pairs(clientFiles) do
-        loadClientFile("lyx/cl/" .. fl)
-    end
 
     for _, fl in pairs(sharedFiles) do
         loadSharedFile("lyx/sh/" .. fl)
@@ -58,6 +55,10 @@ local function load()
 
     for _, fl in pairs(serverFiles) do
         loadServerFile("lyx/sv/" .. fl)
+    end
+    
+    for _, fl in pairs(clientFiles) do
+        loadClientFile("lyx/cl/" .. fl)
     end
 
     for _, fl in pairs(vguiFiles) do

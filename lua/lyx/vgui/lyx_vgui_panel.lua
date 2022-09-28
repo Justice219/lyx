@@ -3,7 +3,7 @@ lyx = lyx
 function lyx:Menu()
     local frame = vgui.Create("lyx_frame")
     frame:ShowNavbar(true)
-    frame:SetTitle("Lyx Library v1.23")
+    frame:SetTitle("Lyx Library v1.24")
 
     -- Lets setup our navbar.
     frame.Navbar:AddButton("Video", lyx.Colors.Primary, lyx.Icons.Player, function(pnl)

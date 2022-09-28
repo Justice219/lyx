@@ -40,8 +40,6 @@ hook.Add("PlayerSay", "lyx_chat_commands", function(ply, text)
     local args = string.Explode(" ", text)
     local cmd = args[1]
 
-    PrintTable(lyx.chat)
-
     for k,v in pairs(lyx.chat) do
         if (v.prefix .. k) == cmd then
             lyx:ChatRunCommand(k, ply, args)

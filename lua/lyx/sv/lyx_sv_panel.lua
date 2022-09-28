@@ -8,37 +8,51 @@ util.AddNetworkString("lyx:rank:remove")
 
 
 -- Networking
-net.Receive("lyx:panel:video", function(len, ply)
-    if !lyx:CheckRank(ply) then return end
+lyx:NetAdd("lyx:panel:video", {
+    func = function(ply)
+        if !lyx:CheckRank(ply) then return end
 
-    local ent = net.ReadEntity()
-    if IsValid(ent) then
-        lyx:VideoSend(net.ReadString(), ent, {
-            width = 1920,
-            height = 1080,
-        })
-    else
-        lyx:VideoBroadcast(net.ReadString(), {
-            width = 1920,
-            height = 1080,
-        })
+        local ent = net.ReadEntity()
+        if IsValid(ent) then
+            lyx:VideoSend(net.ReadString(), ent, {
+                width = 1920,
+                height = 1080,
+            })
+        else
+            lyx:VideoBroadcast(net.ReadString(), {
+                width = 1920,
+                height = 1080,
+            })
+        end
     end
-end)
+})
 
-net.Receive("lyx:rank:add", function(len, ply)
-    if !lyx:CheckRank(ply) then return end
-    local rank = net.ReadString()
+lyx:NetAdd("lyx:rank:add", {
+    func = function(ply)
+        if !lyx:CheckRank(ply) then return end
+        local rank = net.ReadString()
+    
+        lyx:AddRank(rank)
+    end
+})
 
-    lyx:AddRank(rank)
-end)
+lyx:NetAdd("lyx:rank:remove", {
+    func = function(ply)
+        if !lyx:CheckRank(ply) then return end
+        local rank = net.ReadString()
+    
+        lyx:RemoveRank(rank)
+    end
+})
 
-net.Receive("lyx:rank:remove", function(len, ply)
-    if !lyx:CheckRank(ply) then return end
-    local rank = net.ReadString()
-
-    lyx:RemoveRank(rank)
-end)
-
+lyx:NetAdd("lyx:webhook:send", {
+    func = function(ply)
+        if !lyx:CheckRank(ply) then return end
+        local h = net.ReadString()
+    
+        lyx:DiscordWebhook(h)
+    end
+})
 
 -- Lets create our chat command!
 lyx:ChatAddCommand("lyx", {

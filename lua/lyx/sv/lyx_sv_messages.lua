@@ -27,10 +27,8 @@ function lyx:MessagePlayer(tbl)
     net.Send(tbl["ply"])
 end
 
---[[
-Example on using the message system
 
-lyx:MessageServer({
+--[[lyx:MessageServer({
     ["type"] = "header",
     ["color1"] = Color(255,0,0),
     ["header"] = "Lyx",
@@ -47,8 +45,6 @@ lyx:MessagePlayer({
     ["color1"] = Color(255,0,0),
     ["header"] = "Lyx",
     ["color2"] = Color(255,255,255),
-    ["text"] = "Hello World"
+    ["text"] = "Hello World",
     ["ply"] = ply
-})
-
---]]
+})-]]
