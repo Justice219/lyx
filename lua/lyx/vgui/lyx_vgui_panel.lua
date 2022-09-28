@@ -134,6 +134,29 @@ function lyx:Menu()
             net.SendToServer()
         end
     end)
+    frame.Navbar:AddButton("Discord", lyx.Colors.Primary, lyx.Icons.Server, function(pnl)
+        pnl:Clear()
+
+        local label = pnl:Add("DLabel")
+        label:SetText("Discord Webhook")
+        label:SetFont("lyx.font.title")
+        label:SetTextColor(lyx.Colors.White)
+        label:SetPos(lyx.Scaling.ScaleW(10), lyx.Scaling.ScaleH(5))
+        label:SizeToContents()
+
+        local webhookOptions = vgui.Create("lyx_list", pnl)
+        webhookOptions:SetSize(pnl:GetWide() - lyx.Scaling.ScaleW(30), lyx.Scaling.ScaleH(40))
+        webhookOptions:SetPos(lyx.Scaling.ScaleW(15), lyx.Scaling.ScaleH(25))
+
+        webhookOptions:AddEntry("Webhook URL", {
+            value = "https://discord.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz",
+            callback = function(box, value)
+                url = value
+            end,
+        })
+
+        webhookOptions:Setup()
+    end)
 
     frame:Setup()
     frame.Navbar:SetTab(1)
