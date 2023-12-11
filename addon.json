@@ -1,0 +1,14 @@
+{
+  "title": "Lyx : Lua Library",
+  "type": "ServerContent",
+  "tags": [
+    "fun",
+    "roleplay",
+    "realism"
+  ],
+  "ignore": [
+    "*.git",
+    "*.gitattributes",
+    "*.txt"
+  ]
+}
