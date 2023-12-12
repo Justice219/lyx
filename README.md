@@ -59,6 +59,12 @@ ExampleHook()                                         -- Lets call the function 
 lyx:HookRemove("lyx_test", test)                      -- Lets remove just to keep random hooks off the server.
 ```
 
+## Documentation
+``Lyx`` contains some detailed documentation   that is still currently a work in progress.  
+
+Check it out
+[here](https://github.com/Justice219/lyx/wiki)
+
 ### Real Project
 [Gamemaster 3](https://github.com/Justice219/gamemaster3) - A powerful gamemaster system created using almost everything lyx has to offer; A prime example of lyx's capabilities.
 
