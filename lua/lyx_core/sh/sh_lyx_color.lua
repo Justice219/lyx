@@ -120,6 +120,7 @@ end
 
 do
     local colorMeta = FindMetaTable("Color")
+
     colorMeta.Copy = lyx.CopyColor
     colorMeta.IsLight = lyx.IsColorLight
     colorMeta.EqualTo = lyx.IsColorEqualTo
