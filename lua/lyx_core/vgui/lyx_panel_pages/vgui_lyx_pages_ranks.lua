@@ -167,12 +167,9 @@ function PANEL:AddRankDialog()
     
     -- Test with basic DButton first to see if it's a lyx.TextButton2 issue
     addBtn.DoClick = function(btn)
-        print("[DEBUG] Add Rank button clicked!")
-        local rankName = nameEntry:GetText()
-        print("[DEBUG] Rank name from entry: '" .. tostring(rankName) .. "'")
+        local rankName = nameEntry:GetValue()  -- Use GetValue() not GetText() for lyx.TextEntry2
         
         if rankName and rankName ~= "" then
-            print("[DEBUG] Sending rank add request for: " .. rankName)
             
             net.Start("lyx:rank:add")
             net.WriteString(rankName)
@@ -188,12 +185,9 @@ function PANEL:AddRankDialog()
                 end
             end)
         else
-            print("[DEBUG] Rank name was empty or nil")
             notification.AddLegacy("Please enter a rank name!", NOTIFY_ERROR, 3)
         end
     end
-    
-    print("[DEBUG] Add button created, DoClick = ", addBtn.DoClick)
     
     -- Add cancel button
     local cancelBtn = vgui.Create("lyx.TextButton2", buttonPanel)
@@ -202,21 +196,7 @@ function PANEL:AddRankDialog()
     cancelBtn:Dock(LEFT)
     cancelBtn:DockMargin(lyx.Scale(5), lyx.Scale(7), lyx.Scale(5), lyx.Scale(7))
     cancelBtn.DoClick = function(btn)
-        print("[DEBUG] Cancel button clicked")
         frame:Close()
-    end
-    
-    print("[DEBUG] Cancel button created, DoClick = ", cancelBtn.DoClick)
-    
-    -- Test button to verify buttons work at all
-    local testBtn = vgui.Create("DButton", buttonPanel)
-    testBtn:SetText("Test")
-    testBtn:SetSize(lyx.Scale(60), lyx.Scale(35))
-    testBtn:Dock(RIGHT)
-    testBtn:DockMargin(lyx.Scale(5), lyx.Scale(7), lyx.Scale(50), lyx.Scale(7))
-    testBtn.DoClick = function()
-        print("[DEBUG] Test DButton clicked!")
-        notification.AddLegacy("Test button works!", NOTIFY_GENERIC, 2)
     end
 end
 
@@ -365,7 +345,7 @@ function PANEL:ChangeUserRankDialog(ply)
     applyBtn:SetSize(lyx.Scale(100), lyx.Scale(35))
     applyBtn:SetPos(lyx.Scale(150), lyx.Scale(150))
     applyBtn.DoClick = function()
-        local newRank = dropdown:GetSelected()
+        local newRank = dropdown:GetValue()  -- Use GetValue() for DComboBox
         if newRank and newRank ~= ply:GetUserGroup() then
             net.Start("lyx:rank:setuser")
             net.WriteEntity(ply)
