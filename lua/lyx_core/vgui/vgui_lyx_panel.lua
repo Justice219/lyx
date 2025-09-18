@@ -25,6 +25,7 @@ function PANEL:Init()
     if LocalPlayer():GetUserGroup() == "admin" or LocalPlayer():GetUserGroup() == "superadmin" then
         sidebar:AddItem("Commands", "Commands", "Kcvop3T", function() self:ChangeTab("LYX.Pages.Commands", "Command Center") end)
         sidebar:AddItem("Logs", "Logs", "fi4ItlE", function() self:ChangeTab("LYX.Pages.Logs", "System Logs") end)
+        sidebar:AddItem("Addons", "Addons", "bRtYuIo", function() self:ChangeTab("LYX.Pages.Addons", "Addon Manager") end)
     end
     
     -- Superadmin only tabs

@@ -141,7 +141,11 @@ function PANEL:AddRankDialog()
     local nameLabel = vgui.Create("DLabel", frame)
     nameLabel:SetText("Rank Name:")
     nameLabel:SetPos(lyx.Scale(20), lyx.Scale(50))
-    nameLabel:SetFont("LYX.Ranks.Text")
+    if lyx.GetRealFont then
+        nameLabel:SetFont(lyx.GetRealFont("LYX.Ranks.Text") or "DermaDefault")
+    else
+        nameLabel:SetFont("DermaDefault")
+    end
     nameLabel:SizeToContents()
     
     local nameEntry = vgui.Create("lyx.TextEntry2", frame)

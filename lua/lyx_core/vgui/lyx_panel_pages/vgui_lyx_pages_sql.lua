@@ -30,7 +30,11 @@ function PANEL:Init()
     
     local queryLabel = vgui.Create("DLabel", queryPanel)
     queryLabel:SetText("SQL Query:")
-    queryLabel:SetFont("LYX.SQL.Text")
+    if lyx.GetRealFont then
+        queryLabel:SetFont(lyx.GetRealFont("LYX.SQL.Text") or "DermaDefault")
+    else
+        queryLabel:SetFont("DermaDefault")
+    end
     queryLabel:SetTextColor(lyx.Colors.SecondaryText)
     queryLabel:SetPos(lyx.Scale(10), lyx.Scale(5))
     queryLabel:SizeToContents()
@@ -39,7 +43,11 @@ function PANEL:Init()
     queryInput:SetPos(lyx.Scale(10), lyx.Scale(30))
     queryInput:SetSize(queryPanel:GetWide() - lyx.Scale(20), lyx.Scale(70))
     queryInput:SetMultiline(true)
-    queryInput:SetFont("LYX.SQL.Text")
+    if lyx.GetRealFont then
+        queryInput:SetFont(lyx.GetRealFont("LYX.SQL.Text") or "DermaDefaultFixed")
+    else
+        queryInput:SetFont("DermaDefaultFixed")
+    end
     queryInput:SetText("SELECT * FROM ")
     
     -- Execute button

@@ -13,11 +13,12 @@ function PANEL:Init()
         draw.SimpleText("System Logs", "LYX.Logs.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
     end
     
-    -- Clear logs button
+    -- Clear logs button - use docking for proper positioning
     local clearBtn = vgui.Create("lyx.TextButton2", headerPanel)
     clearBtn:SetText("Clear Logs")
-    clearBtn:SetSize(lyx.Scale(100), lyx.Scale(35))
-    clearBtn:SetPos(headerPanel:GetWide() - lyx.Scale(120), lyx.Scale(12))
+    clearBtn:Dock(RIGHT)
+    clearBtn:DockMargin(0, lyx.Scale(12), lyx.Scale(12), lyx.Scale(12))
+    clearBtn:SetWide(lyx.Scale(100))
     clearBtn.DoClick = function()
         self.LogList:Clear()
         notification.AddLegacy("Logs cleared!", NOTIFY_GENERIC, 3)
