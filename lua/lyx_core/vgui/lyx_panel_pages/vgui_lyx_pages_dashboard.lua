@@ -113,33 +113,13 @@ function PANEL:Init()
     end
     
     -- Activity list
-    self.ActivityList = vgui.Create("DListView", activityPanel)
+    self.ActivityList = vgui.Create("lyx.ListView2", activityPanel)
     self.ActivityList:Dock(FILL)
     self.ActivityList:DockMargin(lyx.Scale(10), lyx.Scale(40), lyx.Scale(10), lyx.Scale(10))
-    self.ActivityList:SetMultiSelect(false)
     
-    -- Style the list view
-    self.ActivityList.Paint = function(pnl, w, h)
-        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
-    end
-    
-    local oldLine = self.ActivityList.AddLine
-    self.ActivityList.AddLine = function(list, ...)
-        local line = oldLine(list, ...)
-        line.Paint = function(pnl, w, h)
-            if pnl:IsHovered() then
-                draw.RoundedBox(0, 0, 0, w, h, Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 30))
-            end
-        end
-        for _, col in pairs(line.Columns) do
-            col:SetTextColor(lyx.Colors.SecondaryText)
-        end
-        return line
-    end
-    
-    self.ActivityList:AddColumn("Time"):SetWidth(lyx.Scale(80))
-    self.ActivityList:AddColumn("Event"):SetWidth(lyx.Scale(150))
-    self.ActivityList:AddColumn("Details")
+    self.ActivityList:AddColumn("Time", lyx.Scale(80))
+    self.ActivityList:AddColumn("Event", lyx.Scale(150))
+    self.ActivityList:AddColumn("Details", lyx.Scale(400))
     
     -- Pull real activity data from Lyx systems
     self:UpdateActivityFeed()
@@ -205,11 +185,7 @@ function PANEL:UpdateActivityFeed()
         if IsValid(self) and IsValid(self.ActivityList) then
             timer.Simple(0, function()
                 if IsValid(self) and IsValid(self.ActivityList) then
-                    self.ActivityList:AddLine(
-                        os.date("%H:%M:%S"),
-                        "Player Joined",
-                        ply:Nick() .. " (" .. ply:SteamID() .. ")"
-                    )
+                    self:AddActivity("Player Joined", ply:Nick() .. " (" .. ply:SteamID() .. ")", "player")
                 end
             end)
         end
@@ -219,11 +195,7 @@ function PANEL:UpdateActivityFeed()
         if IsValid(self) and IsValid(self.ActivityList) then
             timer.Simple(0, function()
                 if IsValid(self) and IsValid(self.ActivityList) then
-                    self.ActivityList:AddLine(
-                        os.date("%H:%M:%S"),
-                        "Player Left",
-                        ply:Nick()
-                    )
+                    self:AddActivity("Player Left", ply:Nick(), "player")
                 end
             end)
         end
@@ -233,7 +205,7 @@ function PANEL:UpdateActivityFeed()
     table.sort(activities, function(a, b) return a.time > b.time end)
     
     for _, activity in ipairs(activities) do
-        self.ActivityList:AddLine(activity.time, activity.event, activity.details)
+        self:AddActivity(activity.event, activity.details, "system")
     end
     
     -- Auto-refresh every 5 seconds
@@ -254,6 +226,67 @@ function PANEL:OnRemove()
     timer.Remove("Lyx.Dashboard.Refresh")
     hook.Remove("PlayerInitialSpawn", "Lyx.Dashboard.PlayerJoin")
     hook.Remove("PlayerDisconnected", "Lyx.Dashboard.PlayerLeave")
+end
+
+function PANEL:AddActivity(event, details, activityType)
+    local time = os.date("%H:%M:%S")
+    
+    local row = self.ActivityList:AddRow(time, event, details)
+    
+    -- Store activity type for painting
+    row.ActivityType = activityType
+    row.ActivityTime = time
+    row.ActivityEvent = event
+    row.ActivityDetails = details
+    
+    -- Override paint for activity type coloring
+    local oldPaint = row.Paint
+    row.Paint = function(pnl, w, h)
+        -- Background
+        local bgColor = lyx.Colors.Background
+        
+        if pnl == self.ActivityList.SelectedRow then
+            bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 40)
+        elseif pnl:IsHovered() then
+            bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 20)
+        end
+        
+        draw.RoundedBox(4, 0, 0, w, h, bgColor)
+        
+        -- Activity type color
+        local typeColor = lyx.Colors.SecondaryText
+        if pnl.ActivityType == "player" then
+            typeColor = lyx.Colors.Primary or Color(52, 152, 219)
+        elseif pnl.ActivityType == "system" then
+            typeColor = lyx.Colors.Positive or Color(46, 204, 113)
+        elseif pnl.ActivityType == "error" then
+            typeColor = lyx.Colors.Negative or Color(231, 76, 60)
+        elseif pnl.ActivityType == "warning" then
+            typeColor = lyx.Colors.Warning or Color(241, 196, 15)
+        end
+        
+        -- Color indicator dot
+        draw.RoundedBox(4, lyx.Scale(8), h/2 - lyx.Scale(4), lyx.Scale(8), lyx.Scale(8), typeColor)
+        
+        -- Draw values
+        local x = lyx.Scale(20)
+        local values = {pnl.ActivityTime, pnl.ActivityEvent, pnl.ActivityDetails}
+        for i, header in ipairs(self.ActivityList.Headers) do
+            local value = values[i] or ""
+            local textColor = (i == 2) and typeColor or lyx.Colors.SecondaryText
+            draw.SimpleText(tostring(value), "LYX.List.Text", x + lyx.Scale(10), h/2, textColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+            x = x + header.Width
+        end
+    end
+    
+    -- Keep only last 50 activities
+    if self.ActivityList:GetRowCount() > 50 then
+        local firstRow = self.ActivityList.Rows[1]
+        if IsValid(firstRow) then
+            firstRow:Remove()
+            table.remove(self.ActivityList.Rows, 1)
+        end
+    end
 end
 
 vgui.Register("LYX.Pages.Dashboard", PANEL)

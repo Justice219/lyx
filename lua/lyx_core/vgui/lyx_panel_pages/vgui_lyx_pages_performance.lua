@@ -101,20 +101,15 @@ function PANEL:Init()
             draw.SimpleText("Hook Performance", "LYX.Perf.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
         end
         
-        local hookList = vgui.Create("DListView", hookPanel)
+        local hookList = vgui.Create("lyx.ListView2", hookPanel)
         hookList:Dock(FILL)
         hookList:DockMargin(lyx.Scale(10), lyx.Scale(40), lyx.Scale(10), lyx.Scale(10))
-        hookList:SetMultiSelect(false)
         
-        -- Style the list
-        hookList.Paint = function(pnl, w, h)
-            draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
-        end
-        hookList:AddColumn("Hook Name"):SetWidth(lyx.Scale(200))
-        hookList:AddColumn("Calls"):SetWidth(lyx.Scale(80))
-        hookList:AddColumn("Avg Time (ms)"):SetWidth(lyx.Scale(120))
-        hookList:AddColumn("Total Time (s)"):SetWidth(lyx.Scale(120))
-        hookList:AddColumn("Max Time (ms)"):SetWidth(lyx.Scale(120))
+        hookList:AddColumn("Hook Name", lyx.Scale(200))
+        hookList:AddColumn("Calls", lyx.Scale(80))
+        hookList:AddColumn("Avg Time (ms)", lyx.Scale(120))
+        hookList:AddColumn("Total Time (s)", lyx.Scale(120))
+        hookList:AddColumn("Max Time (ms)", lyx.Scale(120))
         
         self.HookList = hookList
         self:UpdateHookStats()
@@ -220,20 +215,71 @@ function PANEL:UpdateHookStats()
     local stats = lyx:HookGetStats()
     if not stats then return end
     
+    -- Convert to sorted array
+    local sorted = {}
     for hookName, data in pairs(stats) do
         if data and data.calls and data.calls > 0 then
-            self.HookList:AddLine(
-                hookName,
-                data.calls,
-                math.Round((data.totalTime / data.calls) * 1000, 3),
-                math.Round(data.totalTime, 3),
-                math.Round(data.maxTime * 1000, 3)
-            )
+            table.insert(sorted, {
+                name = hookName,
+                calls = data.calls,
+                avgTime = math.Round((data.totalTime / data.calls) * 1000, 3),
+                totalTime = math.Round(data.totalTime, 3),
+                maxTime = math.Round(data.maxTime * 1000, 3)
+            })
         end
     end
     
     -- Sort by total time descending
-    self.HookList:SortByColumn(4, true)
+    table.sort(sorted, function(a, b)
+        return a.totalTime > b.totalTime
+    end)
+    
+    -- Add rows with color coding based on performance
+    for _, data in ipairs(sorted) do
+        local row = self.HookList:AddRow(
+            data.name,
+            data.calls,
+            data.avgTime,
+            data.totalTime,
+            data.maxTime
+        )
+        
+        -- Override paint for performance color coding
+        local oldPaint = row.Paint
+        row.Paint = function(pnl, w, h)
+            -- Background
+            local bgColor = lyx.Colors.Background
+            
+            if pnl == self.HookList.SelectedRow then
+                bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 40)
+            elseif pnl:IsHovered() then
+                bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 20)
+            end
+            
+            draw.RoundedBox(4, 0, 0, w, h, bgColor)
+            
+            -- Performance indicator color
+            local perfColor = lyx.Colors.Positive or Color(46, 204, 113)
+            if data.avgTime > 10 then
+                perfColor = lyx.Colors.Negative or Color(231, 76, 60)
+            elseif data.avgTime > 5 then
+                perfColor = lyx.Colors.Warning or Color(241, 196, 15)
+            end
+            
+            -- Color bar on left
+            draw.RoundedBox(2, 0, 0, lyx.Scale(3), h, perfColor)
+            
+            -- Draw values
+            local x = lyx.Scale(5)
+            for i, header in ipairs(self.HookList.Headers) do
+                local values = {data.name, data.calls, data.avgTime, data.totalTime, data.maxTime}
+                local value = values[i] or ""
+                local textColor = (i == 3 and data.avgTime > 5) and perfColor or lyx.Colors.SecondaryText
+                draw.SimpleText(tostring(value), "LYX.List.Text", x + lyx.Scale(10), h/2, textColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+                x = x + header.Width
+            end
+        end
+    end
 end
 
 function PANEL:OnRemove()
