@@ -32,6 +32,11 @@ function PANEL:Init()
     self.ScrollPanel = vgui.Create("lyx.ScrollPanel2", self)
     self.ScrollPanel:Dock(FILL)
     self.ScrollPanel:DockMargin(0, lyx.Scale(5), 0, 0)
+    
+    self.RowContainer = vgui.Create("DPanel", self.ScrollPanel)
+    self.RowContainer:Dock(TOP)
+    self.RowContainer:SetTall(0)
+    self.RowContainer.Paint = function() end
 end
 
 function PANEL:AddColumn(name, width)
@@ -91,12 +96,10 @@ end
 function PANEL:AddRow(...)
     local values = {...}
     
-    -- Create row on the scroll panel's canvas
-    local canvas = self.ScrollPanel:GetCanvas()
-    local row = vgui.Create("DButton", canvas)
+    local row = vgui.Create("DButton", self.RowContainer)
     row:Dock(TOP)
     row:SetTall(lyx.Scale(35))
-    row:DockMargin(lyx.Scale(5), 0, lyx.Scale(5), lyx.Scale(2))
+    row:DockMargin(0, 0, 0, lyx.Scale(2))
     row:SetText("")
     row.Values = values
     row.Index = #self.Rows + 1
@@ -135,9 +138,8 @@ function PANEL:AddRow(...)
     
     table.insert(self.Rows, row)
     
-    -- Update canvas size for scrolling
-    local canvas = self.ScrollPanel:GetCanvas()
-    canvas:SetTall(#self.Rows * (lyx.Scale(35) + lyx.Scale(2)))
+    -- Update container height
+    self.RowContainer:SetTall(#self.Rows * (lyx.Scale(35) + lyx.Scale(2)))
     
     return row
 end
@@ -151,11 +153,7 @@ function PANEL:Clear()
     
     self.Rows = {}
     self.SelectedRow = nil
-    
-    local canvas = self.ScrollPanel:GetCanvas()
-    if canvas then
-        canvas:SetTall(0)
-    end
+    self.RowContainer:SetTall(0)
 end
 
 function PANEL:SelectRow(row)

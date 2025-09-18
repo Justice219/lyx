@@ -6,7 +6,6 @@ lyx.RegisterFont("LYX.Ranks.Text", "Open Sans", lyx.Scale(14))
 -- Network receiver for rank sync
 net.Receive("lyx:rank:sync", function()
     local ranks = net.ReadTable()
-    print("[DEBUG] Received ranks from server:", table.concat(ranks or {}, ", "))
     
     -- Find the ranks panel if it exists
     local ranksPanel = nil
@@ -18,10 +17,7 @@ net.Receive("lyx:rank:sync", function()
     end
     
     if ranksPanel then
-        print("[DEBUG] Found ranks panel, refreshing with ranks")
         ranksPanel:RefreshRanks(ranks)
-    else
-        print("[DEBUG] No ranks panel found")
     end
 end)
 
@@ -93,8 +89,47 @@ function PANEL:Init()
     self.RanksList:AddColumn("Type", lyx.Scale(100))
     self.RanksList:AddColumn("Actions", lyx.Scale(200))
     
-    -- Don't override row painting for now - use default to test
-    -- We'll add custom painting after confirming rows display
+    -- Override row painting for rank colors (matching Players page implementation)
+    local oldAddRow = self.RanksList.AddRow
+    self.RanksList.AddRow = function(list, ...)
+        local row = oldAddRow(list, ...)
+        local values = {...}
+        local rankName = values[1]
+        
+        -- Store rank data in row
+        row.RankName = rankName
+        
+        -- Override paint for rank coloring
+        local oldPaint = row.Paint
+        row.Paint = function(pnl, w, h)
+            -- Background
+            local bgColor = lyx.Colors.Background
+            
+            if pnl == list.SelectedRow then
+                bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 40)
+            elseif pnl:IsHovered() then
+                bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 20)
+            end
+            
+            draw.RoundedBox(4, 0, 0, w, h, bgColor)
+            
+            -- Rank color indicator
+            local rankColor = self:GetRankColor(rankName)
+            draw.RoundedBox(2, 0, 0, lyx.Scale(3), h, rankColor)
+            
+            -- Draw values with proper font
+            local x = lyx.Scale(5)
+            for i, header in ipairs(list.Headers) do
+                local value = values[i] or ""
+                local textColor = (i == 1) and rankColor or lyx.Colors.SecondaryText
+                local font = lyx.GetRealFont and lyx.GetRealFont("LYX.List.Text") or "DermaDefault"
+                draw.SimpleText(tostring(value), font, x + lyx.Scale(10), h/2, textColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+                x = x + header.Width
+            end
+        end
+        
+        return row
+    end
     
     -- Right-click menu
     self.RanksList.OnRowRightClick = function(list, index, row)
@@ -143,20 +178,17 @@ function PANEL:Init()
 end
 
 function PANEL:RequestRanksFromServer()
-    print("[DEBUG] Requesting ranks from server")
     -- Request ranks list from server
     net.Start("lyx:rank:getall")
     net.SendToServer()
 end
 
 function PANEL:RefreshRanks(ranks)
-    print("[DEBUG] RefreshRanks called with ranks:", ranks)
     self.RanksList:Clear()
     self.RanksData = ranks or {}
     
     -- Default ranks if none exist
     if type(self.RanksData) ~= "table" or table.Count(self.RanksData) == 0 then
-        print("[DEBUG] No ranks data, using defaults")
         self.RanksData = {
             "superadmin",
             "admin",
@@ -164,8 +196,6 @@ function PANEL:RefreshRanks(ranks)
             "user"
         }
     end
-    
-    print("[DEBUG] Processing " .. table.Count(self.RanksData) .. " ranks")
     
     -- Check if RanksData is a key-value table or array
     local ranksToProcess = {}
@@ -179,10 +209,7 @@ function PANEL:RefreshRanks(ranks)
         end
     end
     
-    print("[DEBUG] Ranks to process:", table.concat(ranksToProcess, ", "))
-    
     for _, rankName in ipairs(ranksToProcess) do
-        print("[DEBUG] Adding rank to list: " .. rankName)
         
         -- Count users with this rank
         local userCount = 0
@@ -202,39 +229,14 @@ function PANEL:RefreshRanks(ranks)
             rankType = "Special"
         end
         
-        -- Add row to list
-        local row = self.RanksList:AddRow(
+        -- Add row to list (row painting is handled by override above)
+        self.RanksList:AddRow(
             rankName,
             tostring(userCount),
             "View/Edit",
             rankType,
             "Manage"
         )
-        
-        -- Store rank name for right-click menu
-        if row then
-            row.RankName = rankName
-            print("[DEBUG] Row added successfully for " .. rankName)
-            print("[DEBUG] Row position: " .. tostring(row:GetPos()))
-            print("[DEBUG] Row size: " .. row:GetWide() .. "x" .. row:GetTall())
-            print("[DEBUG] Row visible: " .. tostring(row:IsVisible()))
-        else
-            print("[DEBUG] Failed to add row for " .. rankName)
-        end
-    end
-    
-    print("[DEBUG] ListView now has " .. self.RanksList:GetRowCount() .. " rows")
-    
-    -- Debug: Check the scroll panel and canvas
-    if self.RanksList.ScrollPanel then
-        print("[DEBUG] ScrollPanel size: " .. self.RanksList.ScrollPanel:GetWide() .. "x" .. self.RanksList.ScrollPanel:GetTall())
-        print("[DEBUG] ScrollPanel visible: " .. tostring(self.RanksList.ScrollPanel:IsVisible()))
-        
-        local canvas = self.RanksList.ScrollPanel:GetCanvas()
-        if canvas then
-            print("[DEBUG] Canvas height: " .. canvas:GetTall())
-            print("[DEBUG] Canvas visible: " .. tostring(canvas:IsVisible()))
-        end
     end
 end
 
