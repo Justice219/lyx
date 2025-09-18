@@ -6,6 +6,7 @@ lyx.RegisterFont("LYX.Ranks.Text", "Open Sans", lyx.Scale(14))
 -- Network receiver for rank sync
 net.Receive("lyx:rank:sync", function()
     local ranks = net.ReadTable()
+    print("[DEBUG] Received ranks from server:", table.concat(ranks or {}, ", "))
     
     -- Find the ranks panel if it exists
     local ranksPanel = nil
@@ -17,7 +18,10 @@ net.Receive("lyx:rank:sync", function()
     end
     
     if ranksPanel then
+        print("[DEBUG] Found ranks panel, refreshing with ranks")
         ranksPanel:RefreshRanks(ranks)
+    else
+        print("[DEBUG] No ranks panel found")
     end
 end)
 
@@ -35,7 +39,16 @@ function PANEL:Init()
         draw.SimpleText("Rank Management", "LYX.Ranks.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
         
         -- Rank count
-        local count = table.Count(self.RanksData)
+        local count = 0
+        if type(self.RanksData) == "table" then
+            if self.RanksData[1] then
+                -- Array
+                count = #self.RanksData
+            else
+                -- Key-value table
+                count = table.Count(self.RanksData)
+            end
+        end
         draw.SimpleText(count .. " ranks", "LYX.Ranks.Text", w - lyx.Scale(320), lyx.Scale(22), lyx.Colors.SecondaryText)
     end
     
@@ -168,17 +181,20 @@ function PANEL:Init()
 end
 
 function PANEL:RequestRanksFromServer()
+    print("[DEBUG] Requesting ranks from server")
     -- Request ranks list from server
     net.Start("lyx:rank:getall")
     net.SendToServer()
 end
 
 function PANEL:RefreshRanks(ranks)
+    print("[DEBUG] RefreshRanks called with ranks:", ranks)
     self.RanksList:Clear()
     self.RanksData = ranks or {}
     
     -- Default ranks if none exist
-    if table.Count(self.RanksData) == 0 then
+    if type(self.RanksData) ~= "table" or table.Count(self.RanksData) == 0 then
+        print("[DEBUG] No ranks data, using defaults")
         self.RanksData = {
             "superadmin",
             "admin",
@@ -187,7 +203,25 @@ function PANEL:RefreshRanks(ranks)
         }
     end
     
-    for _, rankName in ipairs(self.RanksData) do
+    print("[DEBUG] Processing " .. table.Count(self.RanksData) .. " ranks")
+    
+    -- Check if RanksData is a key-value table or array
+    local ranksToProcess = {}
+    if self.RanksData[1] then
+        -- It's an array
+        ranksToProcess = self.RanksData
+    else
+        -- It's a key-value table, extract keys
+        for rankName, _ in pairs(self.RanksData) do
+            table.insert(ranksToProcess, rankName)
+        end
+    end
+    
+    print("[DEBUG] Ranks to process:", table.concat(ranksToProcess, ", "))
+    
+    for _, rankName in ipairs(ranksToProcess) do
+        print("[DEBUG] Adding rank to list: " .. rankName)
+        
         -- Count users with this rank
         local userCount = 0
         for _, ply in ipairs(player.GetAll()) do
@@ -214,7 +248,15 @@ function PANEL:RefreshRanks(ranks)
             rankType,
             "Manage"
         )
+        
+        if row then
+            print("[DEBUG] Row added successfully for " .. rankName)
+        else
+            print("[DEBUG] Failed to add row for " .. rankName)
+        end
     end
+    
+    print("[DEBUG] ListView now has " .. self.RanksList:GetRowCount() .. " rows")
 end
 
 function PANEL:GetRankColor(rankName)
