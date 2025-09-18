@@ -1,11 +1,13 @@
 local PANEL = {}
+local ranks = {}
 
 lyx.RegisterFont("LYX.Ranks.Header", "Open Sans SemiBold", lyx.Scale(18))
 lyx.RegisterFont("LYX.Ranks.Text", "Open Sans", lyx.Scale(14))
 
 -- Network receiver for rank sync
 net.Receive("lyx:rank:sync", function()
-    local ranks = net.ReadTable()
+    local receivedRanks = net.ReadTable()
+    ranks = receivedRanks  -- Store in the file-local ranks table
     
     -- Find the ranks panel if it exists
     local ranksPanel = nil
@@ -25,6 +27,11 @@ function PANEL:Init()
     -- Store ranks locally
     self.RanksData = {}
     
+    -- Use the file-local ranks if already received
+    if ranks and #ranks > 0 then
+        self.RanksData = ranks
+    end
+    
     -- Header
     local headerPanel = vgui.Create("DPanel", self)
     headerPanel:Dock(TOP)
@@ -34,15 +41,16 @@ function PANEL:Init()
         draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         draw.SimpleText("Rank Management", "LYX.Ranks.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
         
-        -- Rank count
+        -- Rank count - use both file-local and panel data
         local count = 0
-        if type(self.RanksData) == "table" then
-            if self.RanksData[1] then
+        local dataToCount = self.RanksData or ranks or {}
+        if type(dataToCount) == "table" then
+            if dataToCount[1] then
                 -- Array
-                count = #self.RanksData
+                count = #dataToCount
             else
                 -- Key-value table
-                count = table.Count(self.RanksData)
+                count = table.Count(dataToCount)
             end
         end
         draw.SimpleText(count .. " ranks", "LYX.Ranks.Text", w - lyx.Scale(320), lyx.Scale(22), lyx.Colors.SecondaryText)
@@ -173,8 +181,12 @@ function PANEL:Init()
         menu:Open()
     end
     
-    -- Request ranks from server
-    self:RequestRanksFromServer()
+    -- Request ranks from server (or use cached if available)
+    if ranks and #ranks > 0 then
+        self:RefreshRanks(ranks)
+    else
+        self:RequestRanksFromServer()
+    end
 end
 
 function PANEL:RequestRanksFromServer()
@@ -183,9 +195,19 @@ function PANEL:RequestRanksFromServer()
     net.SendToServer()
 end
 
-function PANEL:RefreshRanks(ranks)
+function PANEL:RefreshRanks(receivedRanks)
+    print("[DEBUG] RefreshRanks called")
     self.RanksList:Clear()
-    self.RanksData = ranks or {}
+    
+    -- Update both local and panel data
+    if receivedRanks then
+        ranks = receivedRanks  -- Update file-local table
+        self.RanksData = receivedRanks
+        print("[DEBUG] Using received ranks:", table.concat(receivedRanks, ", "))
+    else
+        self.RanksData = ranks  -- Use existing file-local table
+        print("[DEBUG] Using cached ranks:", ranks and table.concat(ranks, ", ") or "none")
+    end
     
     -- Default ranks if none exist
     if type(self.RanksData) ~= "table" or table.Count(self.RanksData) == 0 then
@@ -209,7 +231,9 @@ function PANEL:RefreshRanks(ranks)
         end
     end
     
+    print("[DEBUG] Processing " .. #ranksToProcess .. " ranks")
     for _, rankName in ipairs(ranksToProcess) do
+        print("[DEBUG] Adding rank: " .. rankName)
         
         -- Count users with this rank
         local userCount = 0
