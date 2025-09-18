@@ -3,7 +3,28 @@ local PANEL = {}
 lyx.RegisterFont("LYX.Ranks.Header", "Open Sans SemiBold", lyx.Scale(18))
 lyx.RegisterFont("LYX.Ranks.Text", "Open Sans", lyx.Scale(14))
 
+-- Network receiver for rank sync
+net.Receive("lyx:rank:sync", function()
+    local ranks = net.ReadTable()
+    
+    -- Find the ranks panel if it exists
+    local ranksPanel = nil
+    for _, v in pairs(vgui.GetAll()) do
+        if v.ClassName == "LYX.Pages.Ranks" and IsValid(v) then
+            ranksPanel = v
+            break
+        end
+    end
+    
+    if ranksPanel then
+        ranksPanel:RefreshRanks(ranks)
+    end
+end)
+
 function PANEL:Init()
+    -- Store ranks locally
+    self.RanksData = {}
+    
     -- Header
     local headerPanel = vgui.Create("DPanel", self)
     headerPanel:Dock(TOP)
@@ -12,6 +33,10 @@ function PANEL:Init()
     headerPanel.Paint = function(pnl, w, h)
         draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         draw.SimpleText("Rank Management", "LYX.Ranks.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
+        
+        -- Rank count
+        local count = table.Count(self.RanksData)
+        draw.SimpleText(count .. " ranks", "LYX.Ranks.Text", w - lyx.Scale(320), lyx.Scale(22), lyx.Colors.SecondaryText)
     end
     
     -- Add rank button - use docking for proper positioning
@@ -24,110 +49,186 @@ function PANEL:Init()
         self:AddRankDialog()
     end
     
-    -- Ranks list using Lyx's list system
-    self.RanksList = vgui.Create("lyx.ScrollPanel2", self)
+    -- Refresh button
+    local refreshBtn = vgui.Create("lyx.TextButton2", headerPanel)
+    refreshBtn:SetText("Refresh")
+    refreshBtn:Dock(RIGHT)
+    refreshBtn:DockMargin(0, lyx.Scale(12), lyx.Scale(5), lyx.Scale(12))
+    refreshBtn:SetWide(lyx.Scale(80))
+    refreshBtn.DoClick = function()
+        self:RequestRanksFromServer()
+        notification.AddLegacy("Refreshing ranks list...", NOTIFY_GENERIC, 2)
+    end
+    
+    -- Main list panel
+    local listPanel = vgui.Create("DPanel", self)
+    listPanel:Dock(FILL)
+    listPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
+    listPanel.Paint = function(pnl, w, h)
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+    end
+    
+    -- Use custom ListView for ranks
+    self.RanksList = vgui.Create("lyx.ListView2", listPanel)
     self.RanksList:Dock(FILL)
-    self.RanksList:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
+    self.RanksList:DockMargin(lyx.Scale(5), lyx.Scale(5), lyx.Scale(5), lyx.Scale(5))
     
-    -- Refresh ranks
-    self:RefreshRanks()
-end
-
-function PANEL:RefreshRanks()
-    self.RanksList:Clear()
+    -- Add columns
+    self.RanksList:AddColumn("Rank Name", lyx.Scale(200))
+    self.RanksList:AddColumn("Users", lyx.Scale(80))
+    self.RanksList:AddColumn("Permissions", lyx.Scale(150))
+    self.RanksList:AddColumn("Type", lyx.Scale(100))
+    self.RanksList:AddColumn("Actions", lyx.Scale(200))
     
-    -- Get ranks from lyx system
-    if lyx.GetAllRanks then
-        local ranks = lyx:GetAllRanks()
+    -- Override row painting for rank colors
+    local oldAddRow = self.RanksList.AddRow
+    self.RanksList.AddRow = function(list, ...)
+        local row = oldAddRow(list, ...)
+        local values = {...}
+        local rankName = values[1]
         
-        for _, rankName in ipairs(ranks) do
-            -- Count users with this rank
-            local userCount = 0
-            for _, ply in ipairs(player.GetAll()) do
-                if ply:GetUserGroup() == rankName then
-                    userCount = userCount + 1
-                end
+        -- Store rank data in row
+        row.RankName = rankName
+        
+        -- Override paint for rank coloring
+        local oldPaint = row.Paint
+        row.Paint = function(pnl, w, h)
+            -- Background
+            local bgColor = lyx.Colors.Background
+            
+            if pnl == list.SelectedRow then
+                bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 40)
+            elseif pnl:IsHovered() then
+                bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 20)
             end
             
-            -- Get rank color
-            local rankColors = {
-                superadmin = Color(255, 0, 0),
-                admin = Color(255, 165, 0), 
-                moderator = Color(0, 255, 0),
-                vip = Color(255, 255, 0),
-                user = Color(200, 200, 200)
-            }
+            draw.RoundedBox(4, 0, 0, w, h, bgColor)
             
-            local rankColor = rankColors[rankName] or Color(200, 200, 200)
+            -- Rank color indicator
+            local rankColor = self:GetRankColor(rankName)
+            draw.RoundedBox(2, 0, 0, lyx.Scale(3), h, rankColor)
             
-            -- Create rank panel
-            local rankPanel = vgui.Create("DPanel", self.RanksList)
-            rankPanel:Dock(TOP)
-            rankPanel:SetTall(lyx.Scale(60))
-            rankPanel:DockMargin(0, lyx.Scale(5), lyx.Scale(10), 0)
-            
-            rankPanel.Paint = function(pnl, w, h)
-                draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
-                
-                -- Rank color indicator
-                draw.RoundedBox(4, lyx.Scale(10), lyx.Scale(10), lyx.Scale(8), h - lyx.Scale(20), rankColor)
-                
-                -- Rank name
-                draw.SimpleText(rankName, "LYX.Ranks.Text", lyx.Scale(30), lyx.Scale(15), lyx.Colors.PrimaryText)
-                
-                -- User count
-                draw.SimpleText(userCount .. " users", "LYX.Ranks.Text", lyx.Scale(30), lyx.Scale(35), lyx.Colors.SecondaryText)
-                
-                -- Permissions
-                draw.SimpleText("Standard Permissions", "LYX.Ranks.Text", lyx.Scale(200), lyx.Scale(22), lyx.Colors.DisabledText)
-            end
-            
-            -- Action buttons - delay positioning until panel has width
-            local editBtn = vgui.Create("lyx.TextButton2", rankPanel)
-            editBtn:SetText("Edit")
-            editBtn:SetSize(lyx.Scale(80), lyx.Scale(30))
-            editBtn.DoClick = function()
-                self:EditRankDialog(rankName)
-            end
-            
-            local usersBtn = vgui.Create("lyx.TextButton2", rankPanel)
-            usersBtn:SetText("View Users")
-            usersBtn:SetSize(lyx.Scale(80), lyx.Scale(30))
-            usersBtn.DoClick = function()
-                self:ShowRankUsers(rankName)
-            end
-            
-            local deleteBtn = vgui.Create("lyx.TextButton2", rankPanel)
-            deleteBtn:SetText("Delete")
-            deleteBtn:SetSize(lyx.Scale(80), lyx.Scale(30))
-            deleteBtn.DoClick = function()
-                Derma_Query("Are you sure you want to delete the rank '" .. rankName .. "'?", 
-                    "Delete Rank",
-                    "Yes", function()
-                        net.Start("lyx:rank:remove")
-                        net.WriteString(rankName)
-                        net.SendToServer()
-                        
-                        self:RefreshRanks()
-                    end,
-                    "No", function() end
-                )
-            end
-            
-            -- Position buttons after panel has width
-            rankPanel.PerformLayout = function(pnl, w, h)
-                if editBtn and IsValid(editBtn) then
-                    editBtn:SetPos(w - lyx.Scale(270), lyx.Scale(15))
-                end
-                if usersBtn and IsValid(usersBtn) then
-                    usersBtn:SetPos(w - lyx.Scale(180), lyx.Scale(15))
-                end
-                if deleteBtn and IsValid(deleteBtn) then
-                    deleteBtn:SetPos(w - lyx.Scale(90), lyx.Scale(15))
-                end
+            -- Draw values
+            local x = lyx.Scale(5)
+            for i, header in ipairs(list.Headers) do
+                local value = values[i] or ""
+                local textColor = (i == 1) and rankColor or lyx.Colors.SecondaryText
+                draw.SimpleText(tostring(value), "LYX.List.Text", x + lyx.Scale(10), h/2, textColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+                x = x + header.Width
             end
         end
+        
+        return row
     end
+    
+    -- Right-click menu
+    self.RanksList.OnRowRightClick = function(list, index, row)
+        if not row.RankName then return end
+        
+        local menu = DermaMenu()
+        
+        menu:AddOption("Edit Permissions", function()
+            self:EditRankDialog(row.RankName)
+        end)
+        
+        menu:AddOption("View Users", function()
+            self:ShowRankUsers(row.RankName)
+        end)
+        
+        menu:AddOption("Copy Name", function()
+            SetClipboardText(row.RankName)
+            notification.AddLegacy("Rank name copied to clipboard!", NOTIFY_GENERIC, 2)
+        end)
+        
+        menu:AddSpacer()
+        
+        menu:AddOption("Delete Rank", function()
+            Derma_Query("Are you sure you want to delete the rank '" .. row.RankName .. "'?", 
+                "Delete Rank",
+                "Yes", function()
+                    net.Start("lyx:rank:remove")
+                    net.WriteString(row.RankName)
+                    net.SendToServer()
+                    
+                    timer.Simple(0.5, function()
+                        if IsValid(self) then
+                            self:RequestRanksFromServer()
+                        end
+                    end)
+                end,
+                "No", function() end
+            )
+        end)
+        
+        menu:Open()
+    end
+    
+    -- Request ranks from server
+    self:RequestRanksFromServer()
+end
+
+function PANEL:RequestRanksFromServer()
+    -- Request ranks list from server
+    net.Start("lyx:rank:getall")
+    net.SendToServer()
+end
+
+function PANEL:RefreshRanks(ranks)
+    self.RanksList:Clear()
+    self.RanksData = ranks or {}
+    
+    -- Default ranks if none exist
+    if table.Count(self.RanksData) == 0 then
+        self.RanksData = {
+            "superadmin",
+            "admin",
+            "moderator",
+            "user"
+        }
+    end
+    
+    for _, rankName in ipairs(self.RanksData) do
+        -- Count users with this rank
+        local userCount = 0
+        for _, ply in ipairs(player.GetAll()) do
+            if ply:GetUserGroup() == rankName then
+                userCount = userCount + 1
+            end
+        end
+        
+        -- Determine rank type
+        local rankType = "Custom"
+        if rankName == "superadmin" or rankName == "admin" or rankName == "user" then
+            rankType = "Default"
+        elseif rankName == "moderator" or rankName == "operator" then
+            rankType = "Staff"
+        elseif rankName == "vip" or rankName == "premium" then
+            rankType = "Special"
+        end
+        
+        -- Add row to list
+        local row = self.RanksList:AddRow(
+            rankName,
+            tostring(userCount),
+            "View/Edit",
+            rankType,
+            "Manage"
+        )
+    end
+end
+
+function PANEL:GetRankColor(rankName)
+    local rankColors = {
+        superadmin = Color(255, 0, 0),
+        admin = Color(255, 165, 0),
+        moderator = Color(0, 255, 0),
+        operator = Color(0, 200, 0),
+        vip = Color(255, 255, 0),
+        premium = Color(255, 200, 0),
+        user = Color(200, 200, 200)
+    }
+    
+    return rankColors[rankName] or Color(150, 150, 255)  -- Default color for custom ranks
 end
 
 function PANEL:AddRankDialog()
@@ -181,7 +282,7 @@ function PANEL:AddRankDialog()
             
             timer.Simple(0.5, function()
                 if IsValid(self) then
-                    self:RefreshRanks()
+                    self:RequestRanksFromServer()
                 end
             end)
         else
@@ -354,7 +455,7 @@ function PANEL:ChangeUserRankDialog(ply)
             
             notification.AddLegacy("Changed " .. ply:Nick() .. "'s rank to " .. newRank, NOTIFY_GENERIC, 3)
             frame:Close()
-            self:RefreshRanks()
+            self:RequestRanksFromServer()
         end
     end
 end

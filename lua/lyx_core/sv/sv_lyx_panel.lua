@@ -5,6 +5,8 @@ util.AddNetworkString("lyx:menu:open")
 util.AddNetworkString("lyx:panel:video")
 util.AddNetworkString("lyx:rank:add")
 util.AddNetworkString("lyx:rank:remove")
+util.AddNetworkString("lyx:rank:getall")
+util.AddNetworkString("lyx:rank:sync")
 util.AddNetworkString("lyx:config:save")
 util.AddNetworkString("lyx:config:load")
 
@@ -36,6 +38,18 @@ do
             local rank = net.ReadString()
         
             lyx:AddRank(rank)
+            
+            -- Send updated ranks to all admins
+            timer.Simple(0.5, function()
+                local ranks = lyx.GetAllRanks and lyx:GetAllRanks() or {"superadmin", "admin", "user"}
+                for _, p in ipairs(player.GetAll()) do
+                    if p:IsAdmin() then
+                        net.Start("lyx:rank:sync")
+                        net.WriteTable(ranks)
+                        net.Send(p)
+                    end
+                end
+            end)
         end
     })
 
@@ -45,6 +59,43 @@ do
             local rank = net.ReadString()
         
             lyx:RemoveRank(rank)
+            
+            -- Send updated ranks to all admins
+            timer.Simple(0.5, function()
+                local ranks = lyx.GetAllRanks and lyx:GetAllRanks() or {"superadmin", "admin", "user"}
+                for _, p in ipairs(player.GetAll()) do
+                    if p:IsAdmin() then
+                        net.Start("lyx:rank:sync")
+                        net.WriteTable(ranks)
+                        net.Send(p)
+                    end
+                end
+            end)
+        end
+    })
+    
+    lyx:NetAdd("lyx:rank:getall", {
+        func = function(ply)
+            if !lyx:CheckRank(ply) then return end
+            
+            local ranks = {}
+            
+            -- Get ranks from the system
+            if lyx.GetAllRanks then
+                ranks = lyx:GetAllRanks() or {}
+            end
+            
+            -- If no ranks found, use default ranks
+            if #ranks == 0 then
+                ranks = {"superadmin", "admin", "moderator", "user"}
+            end
+            
+            -- Send ranks to requesting player
+            net.Start("lyx:rank:sync")
+            net.WriteTable(ranks)
+            net.Send(ply)
+            
+            lyx.Logger:Log(ply:Nick() .. " requested ranks list")
         end
     })
 
