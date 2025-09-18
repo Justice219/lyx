@@ -9,16 +9,34 @@ lyx.RegisterFont("LYX.Button", "Open Sans SemiBold", 20)
 function PANEL:Init()
     self:SetSize(lyx.Scale(1280), lyx.Scale(720))
     self:Center()
-    self:SetTitle("Lyx: Revamped")
+    self:SetTitle("Lyx: Enhanced Admin Suite")
     self:MakePopup()
 
     local sidebar = self:CreateSidebar("Dashboard", nil, nil, lyx.Scale(10), lyx.Scale(10))
 
+    -- Main tabs available to all authorized users
     sidebar:AddItem("Dashboard", "Dashboard", "NwmR5Gc", function() self:ChangeTab("LYX.Pages.Dashboard", "Dashboard") end)
-    -- addons
-    sidebar:AddItem("Addons", "Addons", "QzMxgOj", function() self:ChangeTab("GM3.Pages.Addons", "Addons") end)
+    sidebar:AddItem("Server Stats", "Server Stats", "xZyqNvP", function() self:ChangeTab("LYX.Pages.ServerStats", "Server Statistics") end)
+    sidebar:AddItem("Players", "Players", "kLmNpQr", function() self:ChangeTab("LYX.Pages.Players", "Player Management") end)
+    sidebar:AddItem("Performance", "Performance", "aBcDeFg", function() self:ChangeTab("LYX.Pages.Performance", "Performance Monitor") end)
+    sidebar:AddItem("Configuration", "Config", "hIjKlMn", function() self:ChangeTab("LYX.Pages.Config", "Configuration") end)
+    
+    -- Admin/Superadmin only tabs
+    if LocalPlayer():GetUserGroup() == "admin" or LocalPlayer():GetUserGroup() == "superadmin" then
+        sidebar:AddItem("Commands", "Commands", "oPqRsTu", function() self:ChangeTab("LYX.Pages.Commands", "Command Center") end)
+        sidebar:AddItem("Logs", "Logs", "vWxYzAb", function() self:ChangeTab("LYX.Pages.Logs", "System Logs") end)
+    end
+    
+    -- Superadmin only tabs
     if LocalPlayer():GetUserGroup() == "superadmin" then
-        sidebar:AddItem("Ranks", "Ranks", "J9YZQgp", function() self:ChangeTab("GM3.Pages.Ranks", "Ranks") end)
+        sidebar:AddItem("Ranks", "Ranks", "J9YZQgp", function() self:ChangeTab("LYX.Pages.Ranks", "Rank Management") end)
+        sidebar:AddItem("Debug Tools", "Debug", "CdEfGhI", function() self:ChangeTab("LYX.Pages.Debug", "Debug Tools") end)
+        sidebar:AddItem("SQL Manager", "SQL", "jKlMnOp", function() self:ChangeTab("LYX.Pages.SQL", "SQL Manager") end)
+    end
+    
+    -- Developer mode tabs (optional)
+    if GetConVar("developer") and GetConVar("developer"):GetInt() > 0 then
+        sidebar:AddItem("Console", "Console", "QrStUvW", function() self:ChangeTab("LYX.Pages.Console", "Developer Console") end)
     end
 end
 

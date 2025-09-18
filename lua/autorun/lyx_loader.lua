@@ -93,7 +93,7 @@ end
 lyx.Loaded = true
 hook.Run("lyx.Loaded")
 
-do // fix scripts that load after lyx
+do -- fix scripts that load after lyx
     local original = hook.Add
     hook.Add = function(event, ident, fn)
     if event ~= "lyx.Loaded" then return original(event, ident, fn) end
@@ -101,4 +101,5 @@ do // fix scripts that load after lyx
     end
 end
 
-lyx.Logger:Log("LYX loaded!")
+-- Use coreLog instead of lyx.Logger which doesn't exist yet
+coreLog("LYX loaded!")
