@@ -16,18 +16,31 @@ function PANEL:Init()
     
     -- Search box
     local searchBox = vgui.Create("lyx.TextEntry2", controlPanel)
-    searchBox:SetSize(lyx.Scale(200), lyx.Scale(30))
-    searchBox:SetPos(controlPanel:GetWide() - lyx.Scale(220), lyx.Scale(15))
+    searchBox:Dock(RIGHT)
+    searchBox:DockMargin(0, lyx.Scale(12), lyx.Scale(12), lyx.Scale(12))
+    searchBox:SetWide(lyx.Scale(200))
     searchBox:SetPlaceholderText("Search players...")
     searchBox.OnChange = function(s)
         self:FilterPlayers(s:GetText())
     end
     
-    -- Main player list
-    self.PlayerList = vgui.Create("DListView", self)
+    -- Main player list panel
+    local listPanel = vgui.Create("DPanel", self)
+    listPanel:Dock(FILL)
+    listPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
+    listPanel.Paint = function(pnl, w, h)
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+    end
+    
+    self.PlayerList = vgui.Create("DListView", listPanel)
     self.PlayerList:Dock(FILL)
-    self.PlayerList:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
+    self.PlayerList:DockMargin(lyx.Scale(5), lyx.Scale(5), lyx.Scale(5), lyx.Scale(5))
     self.PlayerList:SetMultiSelect(false)
+    
+    -- Style the list
+    self.PlayerList.Paint = function(pnl, w, h)
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
+    end
     
     -- Add columns
     self.PlayerList:AddColumn("Name"):SetWidth(lyx.Scale(200))

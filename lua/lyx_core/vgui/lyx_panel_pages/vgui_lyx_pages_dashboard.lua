@@ -17,10 +17,6 @@ function PANEL:Init()
     welcomePanel.Paint = function(pnl, w, h)
         draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         
-        -- Accent line at top
-        surface.SetDrawColor(lyx.Colors.Primary)
-        surface.DrawRect(0, 0, w, 2)
-        
         draw.SimpleText("Welcome to Lyx Enhanced Admin Suite", "LYX.Dashboard.Title", 
             lyx.Scale(20), lyx.Scale(20), lyx.Colors.PrimaryText, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
         draw.SimpleText("Version 2.0 - Security Hardened Edition", "LYX.Dashboard.Text", 
@@ -46,10 +42,10 @@ function PANEL:Init()
     statsLayout:SetSpaceY(lyx.Scale(10))
     
     local stats = {
-        {title = "Players Online", value = #player.GetAll() .. "/" .. game.MaxPlayers(), icon = "👥"},
-        {title = "Server Uptime", value = string.NiceTime(CurTime()), icon = "⏱️"},
-        {title = "Active Hooks", value = table.Count(lyx.hooks or {}), icon = "🔗"},
-        {title = "Map", value = game.GetMap(), icon = "🗺️"}
+        {title = "Players Online", value = #player.GetAll() .. "/" .. game.MaxPlayers()},
+        {title = "Server Uptime", value = string.NiceTime(CurTime())},
+        {title = "Active Hooks", value = table.Count(hook.GetTable() or {})},
+        {title = "Map", value = game.GetMap()}
     }
     
     for i, stat in ipairs(stats) do
@@ -62,16 +58,12 @@ function PANEL:Init()
             
             -- Hover effect
             if pnl:IsHovered() then
-                surface.SetDrawColor(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 50)
-                surface.DrawRect(0, 0, w, h)
+                draw.RoundedBox(4, 0, 0, w, h, Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 30))
             end
             
             -- Stats
-            draw.SimpleText(stat.title, "LYX.Dashboard.Text", lyx.Scale(10), lyx.Scale(30), lyx.Colors.SecondaryText)
-            draw.SimpleText(stat.value, "LYX.Dashboard.Header", lyx.Scale(10), lyx.Scale(60), lyx.Colors.PrimaryText)
-            
-            -- Icon
-            draw.SimpleText(stat.icon, "LYX.Dashboard.Header", lyx.Scale(10), lyx.Scale(95), lyx.Colors.DisabledText)
+            draw.SimpleText(stat.title, "LYX.Dashboard.Text", lyx.Scale(10), lyx.Scale(15), lyx.Colors.SecondaryText)
+            draw.SimpleText(stat.value, "LYX.Dashboard.Header", lyx.Scale(10), lyx.Scale(40), lyx.Colors.PrimaryText)
         end
     end
     

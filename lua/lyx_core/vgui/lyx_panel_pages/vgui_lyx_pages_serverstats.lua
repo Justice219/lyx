@@ -15,9 +15,9 @@ function PANEL:Init()
     serverPanel:SetTall(lyx.Scale(180))
     serverPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     serverPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         
-        draw.SimpleText("Server Information", "LYX.Stats.Header", lyx.Scale(15), lyx.Scale(10), Color(255, 255, 255))
+        draw.SimpleText("Server Information", "LYX.Stats.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
         
         local info = {
             {"Server Name", GetHostName()},
@@ -34,8 +34,8 @@ function PANEL:Init()
             local x = ((i - 1) % 2) * lyx.Scale(400) + lyx.Scale(15)
             local y = math.floor((i - 1) / 2) * lyx.Scale(30) + lyx.Scale(50)
             
-            draw.SimpleText(data[1] .. ":", "LYX.Stats.Text", x, y, Color(150, 150, 150))
-            draw.SimpleText(tostring(data[2]), "LYX.Stats.Text", x + lyx.Scale(120), y, Color(255, 255, 255))
+            draw.SimpleText(data[1] .. ":", "LYX.Stats.Text", x, y, lyx.Colors.SecondaryText)
+            draw.SimpleText(tostring(data[2]), "LYX.Stats.Text", x + lyx.Scale(120), y, lyx.Colors.PrimaryText)
         end
     end
     
@@ -45,9 +45,9 @@ function PANEL:Init()
     playerStatsPanel:SetTall(lyx.Scale(150))
     playerStatsPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     playerStatsPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         
-        draw.SimpleText("Player Statistics", "LYX.Stats.Header", lyx.Scale(15), lyx.Scale(10), Color(255, 255, 255))
+        draw.SimpleText("Player Statistics", "LYX.Stats.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
         
         local players = player.GetAll()
         local bots = 0
@@ -62,7 +62,7 @@ function PANEL:Init()
         
         -- Big number display
         draw.SimpleText(#players, "LYX.Stats.Big", lyx.Scale(15), lyx.Scale(50), Color(52, 152, 219))
-        draw.SimpleText("Players Online", "LYX.Stats.Text", lyx.Scale(15), lyx.Scale(90), Color(150, 150, 150))
+        draw.SimpleText("Players Online", "LYX.Stats.Text", lyx.Scale(15), lyx.Scale(90), lyx.Colors.SecondaryText)
         
         -- Stats grid
         local stats = {
@@ -77,7 +77,7 @@ function PANEL:Init()
             local y = lyx.Scale(60)
             
             draw.SimpleText(stat[2], "LYX.Stats.Header", x, y, stat[3], TEXT_ALIGN_CENTER)
-            draw.SimpleText(stat[1], "LYX.Stats.Text", x, y + lyx.Scale(25), Color(150, 150, 150), TEXT_ALIGN_CENTER)
+            draw.SimpleText(stat[1], "LYX.Stats.Text", x, y + lyx.Scale(25), lyx.Colors.SecondaryText, TEXT_ALIGN_CENTER)
         end
         
         -- Player graph
@@ -92,7 +92,7 @@ function PANEL:Init()
         local graphH = lyx.Scale(80)
         local graphY = lyx.Scale(50)
         
-        surface.SetDrawColor(20, 20, 30, 150)
+        surface.SetDrawColor(lyx.Colors.Background.r, lyx.Colors.Background.g, lyx.Colors.Background.b, lyx.Colors.Background.a)
         surface.DrawRect(graphX, graphY, graphW, graphH)
         
         for i = 2, #pnl.playerHistory do
@@ -106,7 +106,7 @@ function PANEL:Init()
         end
         
         draw.SimpleText("Player Count (Last 60s)", "LYX.Stats.Text", graphX + graphW/2, graphY - lyx.Scale(15), 
-            Color(150, 150, 150), TEXT_ALIGN_CENTER)
+            lyx.Colors.SecondaryText, TEXT_ALIGN_CENTER)
     end
     
     -- Resource Usage
@@ -115,9 +115,9 @@ function PANEL:Init()
     resourcePanel:SetTall(lyx.Scale(200))
     resourcePanel:DockMargin(0, 0, 0, lyx.Scale(10))
     resourcePanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         
-        draw.SimpleText("Resource Usage", "LYX.Stats.Header", lyx.Scale(15), lyx.Scale(10), Color(255, 255, 255))
+        draw.SimpleText("Resource Usage", "LYX.Stats.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
         
         -- Addon count
         local addons = engine.GetAddons()
@@ -142,8 +142,8 @@ function PANEL:Init()
         
         for i, res in ipairs(resources) do
             local y = lyx.Scale(50 + (i-1) * 25)
-            draw.SimpleText(res[1] .. ":", "LYX.Stats.Text", lyx.Scale(15), y, Color(150, 150, 150))
-            draw.SimpleText(tostring(res[2]), "LYX.Stats.Text", lyx.Scale(200), y, Color(255, 255, 255))
+            draw.SimpleText(res[1] .. ":", "LYX.Stats.Text", lyx.Scale(15), y, lyx.Colors.SecondaryText)
+            draw.SimpleText(tostring(res[2]), "LYX.Stats.Text", lyx.Scale(200), y, lyx.Colors.PrimaryText)
         end
     end
     
@@ -153,9 +153,9 @@ function PANEL:Init()
     netPanel:SetTall(lyx.Scale(150))
     netPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     netPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         
-        draw.SimpleText("Network Statistics", "LYX.Stats.Header", lyx.Scale(15), lyx.Scale(10), Color(255, 255, 255))
+        draw.SimpleText("Network Statistics", "LYX.Stats.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
         
         local incoming = net.BytesReceived and net.BytesReceived() or 0
         local outgoing = net.BytesWritten and net.BytesWritten() or 0
@@ -169,7 +169,7 @@ function PANEL:Init()
         
         for i, stat in ipairs(netStats) do
             local y = lyx.Scale(50 + (i-1) * 25)
-            draw.SimpleText(stat[1] .. ":", "LYX.Stats.Text", lyx.Scale(15), y, Color(150, 150, 150))
+            draw.SimpleText(stat[1] .. ":", "LYX.Stats.Text", lyx.Scale(15), y, lyx.Colors.SecondaryText)
             draw.SimpleText(stat[2], "LYX.Stats.Text", lyx.Scale(150), y, stat[3])
         end
     end
@@ -190,7 +190,7 @@ function PANEL:OnRemove()
 end
 
 function PANEL:Paint(w, h)
-    draw.RoundedBox(8, 0, 0, w, h, lyx.Colors.Background or Color(20, 20, 30))
+    draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
 end
 
 vgui.Register("LYX.Pages.ServerStats", PANEL)

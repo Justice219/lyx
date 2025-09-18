@@ -15,10 +15,10 @@ function PANEL:Init()
     fpsPanel:SetTall(lyx.Scale(120))
     fpsPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     fpsPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         
         -- Title
-        draw.SimpleText("Frame Rate Monitor", "LYX.Perf.Header", lyx.Scale(15), lyx.Scale(10), Color(255, 255, 255))
+        draw.SimpleText("Frame Rate Monitor", "LYX.Perf.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
         
         local fps = math.Round(1 / RealFrameTime())
         local color = Color(46, 204, 113)  -- Green
@@ -31,14 +31,14 @@ function PANEL:Init()
         -- FPS Display
         draw.SimpleText(fps .. " FPS", "LYX.Perf.Number", lyx.Scale(15), lyx.Scale(40), color)
         draw.SimpleText("Frame Time: " .. math.Round(RealFrameTime() * 1000, 2) .. "ms", "LYX.Perf.Text", 
-            lyx.Scale(15), lyx.Scale(70), Color(150, 150, 150))
+            lyx.Scale(15), lyx.Scale(70), lyx.Colors.SecondaryText)
         
         -- Graph background
         local graphX = lyx.Scale(250)
         local graphW = w - graphX - lyx.Scale(20)
         local graphH = h - lyx.Scale(20)
         
-        surface.SetDrawColor(20, 20, 30, 150)
+        surface.SetDrawColor(lyx.Colors.Background.r, lyx.Colors.Background.g, lyx.Colors.Background.b, lyx.Colors.Background.a)
         surface.DrawRect(graphX, lyx.Scale(10), graphW, graphH)
         
         -- Draw FPS graph
@@ -65,9 +65,9 @@ function PANEL:Init()
     memPanel:SetTall(lyx.Scale(100))
     memPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     memPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         
-        draw.SimpleText("Memory Usage", "LYX.Perf.Header", lyx.Scale(15), lyx.Scale(10), Color(255, 255, 255))
+        draw.SimpleText("Memory Usage", "LYX.Perf.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
         
         local memUsage = collectgarbage("count") / 1024  -- Convert to MB
         draw.SimpleText(math.Round(memUsage, 2) .. " MB", "LYX.Perf.Number", 
@@ -79,7 +79,7 @@ function PANEL:Init()
         local barH = lyx.Scale(20)
         local barY = lyx.Scale(45)
         
-        surface.SetDrawColor(20, 20, 30, 150)
+        surface.SetDrawColor(lyx.Colors.Background.r, lyx.Colors.Background.g, lyx.Colors.Background.b, lyx.Colors.Background.a)
         surface.DrawRect(barX, barY, barW, barH)
         
         local memPercent = math.min(memUsage / 512, 1)  -- Assume 512MB max
@@ -97,8 +97,8 @@ function PANEL:Init()
         hookPanel:SetTall(lyx.Scale(300))
         hookPanel:DockMargin(0, 0, 0, lyx.Scale(10))
         hookPanel.Paint = function(pnl, w, h)
-            draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
-            draw.SimpleText("Hook Performance", "LYX.Perf.Header", lyx.Scale(15), lyx.Scale(10), Color(255, 255, 255))
+            draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+            draw.SimpleText("Hook Performance", "LYX.Perf.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
         end
         
         local hookList = vgui.Create("DListView", hookPanel)
@@ -121,8 +121,8 @@ function PANEL:Init()
     entityPanel:SetTall(lyx.Scale(150))
     entityPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     entityPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
-        draw.SimpleText("Entity Statistics", "LYX.Perf.Header", lyx.Scale(15), lyx.Scale(10), Color(255, 255, 255))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+        draw.SimpleText("Entity Statistics", "LYX.Perf.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
         
         local entities = ents.GetAll()
         local props = 0
@@ -148,7 +148,7 @@ function PANEL:Init()
         
         for i, stat in ipairs(stats) do
             local y = lyx.Scale(40 + (i-1) * 20)
-            draw.SimpleText(stat[1] .. ":", "LYX.Perf.Text", lyx.Scale(15), y, Color(150, 150, 150))
+            draw.SimpleText(stat[1] .. ":", "LYX.Perf.Text", lyx.Scale(15), y, lyx.Colors.SecondaryText)
             draw.SimpleText(tostring(stat[2]), "LYX.Perf.Text", lyx.Scale(150), y, stat[3])
         end
     end
@@ -159,7 +159,7 @@ function PANEL:Init()
     controlPanel:SetTall(lyx.Scale(60))
     controlPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     controlPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
     end
     
     local btnGC = vgui.Create("lyx.TextButton2", controlPanel)
@@ -233,7 +233,7 @@ function PANEL:OnRemove()
 end
 
 function PANEL:Paint(w, h)
-    draw.RoundedBox(8, 0, 0, w, h, lyx.Colors.Background or Color(20, 20, 30))
+    draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
 end
 
 vgui.Register("LYX.Pages.Performance", PANEL)

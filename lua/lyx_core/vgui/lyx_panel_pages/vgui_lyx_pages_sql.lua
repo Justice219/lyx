@@ -94,15 +94,15 @@ function PANEL:Init()
     quickPanel:SetWide(lyx.Scale(200))
     quickPanel:DockMargin(0, lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
     quickPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         draw.SimpleText("Quick Queries", "LYX.SQL.Text", lyx.Scale(10), lyx.Scale(10), lyx.Colors.PrimaryText)
     end
     
     local queries = {
         {"Show Tables", "SELECT name FROM sqlite_master WHERE type='table'"},
-        {"Lyx Settings", "SELECT * FROM lyx_settings"},
-        {"Lyx Ranks", "SELECT * FROM lyx_ranks"},
-        {"Player Data", "SELECT * FROM lyx_players"},
+        {"Table Schema", "SELECT sql FROM sqlite_master WHERE type='table'"},
+        {"Database Info", "PRAGMA database_list"},
+        {"Table Count", "SELECT COUNT(*) as table_count FROM sqlite_master WHERE type='table'"},
     }
     
     for i, q in ipairs(queries) do

@@ -317,3 +317,62 @@ do
         end)
     end
 end
+
+-- Network messages for config system
+if SERVER then
+    util.AddNetworkString("lyx:settings:get")
+    util.AddNetworkString("lyx:settings:set")
+    util.AddNetworkString("lyx:settings:getall")
+    util.AddNetworkString("lyx:settings:sync")
+    
+    -- Handle get setting request
+    net.Receive("lyx:settings:get", function(len, ply)
+        if not ply:IsAdmin() then return end
+        
+        local key = net.ReadString()
+        local value = lyx:GetSetting(key)
+        
+        net.Start("lyx:settings:sync")
+        net.WriteString(key)
+        net.WriteString(util.TableToJSON({value = value}))
+        net.Send(ply)
+    end)
+    
+    -- Handle set setting request  
+    net.Receive("lyx:settings:set", function(len, ply)
+        if not ply:IsSuperAdmin() then return end
+        
+        local key = net.ReadString()
+        local valueJson = net.ReadString()
+        local data = util.JSONToTable(valueJson)
+        
+        if data and data.value ~= nil then
+            lyx:SetSetting(key, data.value)
+            
+            -- Broadcast to all admins
+            local admins = {}
+            for _, p in ipairs(player.GetAll()) do
+                if p:IsAdmin() then
+                    table.insert(admins, p)
+                end
+            end
+            
+            net.Start("lyx:settings:sync")
+            net.WriteString(key)
+            net.WriteString(valueJson)
+            net.Send(admins)
+        end
+    end)
+    
+    -- Handle get all settings request
+    net.Receive("lyx:settings:getall", function(len, ply)
+        if not ply:IsAdmin() then return end
+        
+        local settings = lyx:LoadSettings()
+        
+        net.Start("lyx:settings:sync")
+        net.WriteString("__ALL__")
+        net.WriteString(util.TableToJSON(settings))
+        net.Send(ply)
+    end)
+end
