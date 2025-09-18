@@ -121,15 +121,20 @@ function PANEL:Init()
             
             draw.RoundedBox(4, 0, 0, w, h, bgColor)
             
-            -- Rank color indicator
-            local rankColor = self:GetRankColor(rankName)
-            draw.RoundedBox(2, 0, 0, lyx.Scale(3), h, rankColor)
+            -- Simple color indicator
+            draw.RoundedBox(2, 0, 0, lyx.Scale(3), h, lyx.Colors.Primary)
             
             -- Draw values with proper font
             local x = lyx.Scale(5)
             for i, header in ipairs(list.Headers) do
                 local value = values[i] or ""
-                local textColor = (i == 1) and rankColor or lyx.Colors.SecondaryText
+                local textColor = (i == 1) and lyx.Colors.PrimaryText or lyx.Colors.SecondaryText
+                
+                -- Make "Remove" text red and clickable-looking
+                if i == 2 and value == "Remove" then
+                    textColor = lyx.Colors.Negative or Color(231, 76, 60)
+                end
+                
                 local font = lyx.GetRealFont and lyx.GetRealFont("LYX.List.Text") or "DermaDefault"
                 draw.SimpleText(tostring(value), font, x + lyx.Scale(10), h/2, textColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
                 x = x + header.Width
@@ -143,42 +148,22 @@ function PANEL:Init()
     self.RanksList.OnRowRightClick = function(list, index, row)
         if not row.RankName then return end
         
-        local menu = DermaMenu()
-        
-        menu:AddOption("Edit Permissions", function()
-            self:EditRankDialog(row.RankName)
-        end)
-        
-        menu:AddOption("View Users", function()
-            self:ShowRankUsers(row.RankName)
-        end)
-        
-        menu:AddOption("Copy Name", function()
-            SetClipboardText(row.RankName)
-            notification.AddLegacy("Rank name copied to clipboard!", NOTIFY_GENERIC, 2)
-        end)
-        
-        menu:AddSpacer()
-        
-        menu:AddOption("Delete Rank", function()
-            Derma_Query("Are you sure you want to delete the rank '" .. row.RankName .. "'?", 
-                "Delete Rank",
-                "Yes", function()
-                    net.Start("lyx:rank:remove")
-                    net.WriteString(row.RankName)
-                    net.SendToServer()
-                    
-                    timer.Simple(0.5, function()
-                        if IsValid(self) then
-                            self:RequestRanksFromServer()
-                        end
-                    end)
-                end,
-                "No", function() end
-            )
-        end)
-        
-        menu:Open()
+        -- Simple right-click to delete
+        Derma_Query("Are you sure you want to delete the rank '" .. row.RankName .. "'?", 
+            "Delete Rank",
+            "Yes", function()
+                net.Start("lyx:rank:remove")
+                net.WriteString(row.RankName)
+                net.SendToServer()
+                
+                timer.Simple(0.5, function()
+                    if IsValid(self) then
+                        self:RequestRanksFromServer()
+                    end
+                end)
+            end,
+            "No", function() end
+        )
     end
     
     -- Request ranks from server (or use cached if available)
@@ -235,48 +220,19 @@ function PANEL:RefreshRanks(receivedRanks)
     for _, rankName in ipairs(ranksToProcess) do
         print("[DEBUG] Adding rank: " .. rankName)
         
-        -- Count users with this rank
-        local userCount = 0
-        for _, ply in ipairs(player.GetAll()) do
-            if ply:GetUserGroup() == rankName then
-                userCount = userCount + 1
-            end
-        end
-        
-        -- Determine rank type
-        local rankType = "Custom"
-        if rankName == "superadmin" or rankName == "admin" or rankName == "user" then
-            rankType = "Default"
-        elseif rankName == "moderator" or rankName == "operator" then
-            rankType = "Staff"
-        elseif rankName == "vip" or rankName == "premium" then
-            rankType = "Special"
-        end
-        
-        -- Add row to list (row painting is handled by override above)
-        self.RanksList:AddRow(
+        -- Add row to list with just name and Remove button text
+        local row = self.RanksList:AddRow(
             rankName,
-            tostring(userCount),
-            "View/Edit",
-            rankType,
-            "Manage"
+            "Remove"
         )
+        
+        -- Store the rank name for remove functionality
+        if row then
+            row.RankName = rankName
+        end
     end
 end
 
-function PANEL:GetRankColor(rankName)
-    local rankColors = {
-        superadmin = Color(255, 0, 0),
-        admin = Color(255, 165, 0),
-        moderator = Color(0, 255, 0),
-        operator = Color(0, 200, 0),
-        vip = Color(255, 255, 0),
-        premium = Color(255, 200, 0),
-        user = Color(200, 200, 200)
-    }
-    
-    return rankColors[rankName] or Color(150, 150, 255)  -- Default color for custom ranks
-end
 
 function PANEL:AddRankDialog()
     -- Use Lyx's frame system for popups
