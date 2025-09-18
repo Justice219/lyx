@@ -210,4 +210,4 @@ function PANEL:Paint(w, h)
     draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
 end
 
-vgui.Register("lyx.ListView", PANEL)
+vgui.Register("lyx.ListView2", PANEL)

@@ -71,7 +71,7 @@ function PANEL:Init()
     end
     
     -- Use custom list view
-    self.LogList = vgui.Create("lyx.ListView", listContainer)
+    self.LogList = vgui.Create("lyx.ListView2", listContainer)
     self.LogList:Dock(FILL)
     self.LogList:DockMargin(lyx.Scale(5), lyx.Scale(5), lyx.Scale(5), lyx.Scale(5))
     

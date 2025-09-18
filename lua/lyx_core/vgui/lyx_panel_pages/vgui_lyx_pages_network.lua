@@ -92,7 +92,7 @@ function PANEL:Init()
     end
     
     -- Use our custom list view
-    self.MessageList = vgui.Create("lyx.ListView", listPanel)
+    self.MessageList = vgui.Create("lyx.ListView2", listPanel)
     self.MessageList:Dock(FILL)
     self.MessageList:DockMargin(lyx.Scale(10), lyx.Scale(40), lyx.Scale(10), lyx.Scale(10))
     
