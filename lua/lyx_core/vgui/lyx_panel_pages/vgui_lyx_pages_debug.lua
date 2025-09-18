@@ -9,15 +9,16 @@ function PANEL:Init()
     headerPanel:SetTall(lyx.Scale(60))
     headerPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), 0)
     headerPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
-        draw.SimpleText("Debug Tools", "LYX.Debug.Header", lyx.Scale(15), lyx.Scale(20), Color(255, 255, 255))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+        draw.SimpleText("Debug Tools", "LYX.Debug.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
     end
     
-    -- Clear console button
+    -- Clear console button - dock it instead of absolute positioning
     local clearBtn = vgui.Create("lyx.TextButton2", headerPanel)
     clearBtn:SetText("Clear Console")
-    clearBtn:SetSize(lyx.Scale(120), lyx.Scale(35))
-    clearBtn:SetPos(headerPanel:GetWide() - lyx.Scale(140), lyx.Scale(12))
+    clearBtn:Dock(RIGHT)
+    clearBtn:DockMargin(0, lyx.Scale(12), lyx.Scale(12), lyx.Scale(12))
+    clearBtn:SetWide(lyx.Scale(120))
     clearBtn.DoClick = function()
         if self.ConsoleOutput then
             self.ConsoleOutput:SetText("")
@@ -31,25 +32,25 @@ function PANEL:Init()
     infoPanel:SetTall(lyx.Scale(100))
     infoPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), 0)
     infoPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(40, 40, 50, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         
         -- Debug info
         draw.SimpleText("Lua Memory: " .. math.Round(collectgarbage("count") / 1024, 2) .. " MB", "LYX.Debug.Text", 
-            lyx.Scale(10), lyx.Scale(10), Color(200, 200, 200))
+            lyx.Scale(10), lyx.Scale(10), lyx.Colors.SecondaryText)
         draw.SimpleText("Entities: " .. #ents.GetAll(), "LYX.Debug.Text", 
-            lyx.Scale(10), lyx.Scale(30), Color(200, 200, 200))
+            lyx.Scale(10), lyx.Scale(30), lyx.Colors.SecondaryText)
         draw.SimpleText("Players: " .. #player.GetAll() .. "/" .. game.MaxPlayers(), "LYX.Debug.Text", 
-            lyx.Scale(10), lyx.Scale(50), Color(200, 200, 200))
+            lyx.Scale(10), lyx.Scale(50), lyx.Colors.SecondaryText)
         draw.SimpleText("Hooks: " .. table.Count(hook.GetTable()), "LYX.Debug.Text", 
-            lyx.Scale(10), lyx.Scale(70), Color(200, 200, 200))
+            lyx.Scale(10), lyx.Scale(70), lyx.Colors.SecondaryText)
         
         -- Performance stats
         draw.SimpleText("FPS: " .. math.Round(1 / RealFrameTime()), "LYX.Debug.Text", 
-            lyx.Scale(250), lyx.Scale(10), Color(200, 200, 200))
+            lyx.Scale(250), lyx.Scale(10), lyx.Colors.PrimaryText)
         draw.SimpleText("Ping: " .. LocalPlayer():Ping() .. "ms", "LYX.Debug.Text", 
-            lyx.Scale(250), lyx.Scale(30), Color(200, 200, 200))
+            lyx.Scale(250), lyx.Scale(30), lyx.Colors.SecondaryText)
         draw.SimpleText("Tickrate: " .. math.Round(1 / engine.TickInterval()), "LYX.Debug.Text", 
-            lyx.Scale(250), lyx.Scale(50), Color(200, 200, 200))
+            lyx.Scale(250), lyx.Scale(50), lyx.Colors.SecondaryText)
     end
     
     -- Console output
@@ -57,30 +58,31 @@ function PANEL:Init()
     consolePanel:Dock(FILL)
     consolePanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
     consolePanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(20, 20, 30, 240))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
     end
     
     self.ConsoleOutput = vgui.Create("RichText", consolePanel)
     self.ConsoleOutput:Dock(FILL)
-    self.ConsoleOutput:DockMargin(lyx.Scale(5), lyx.Scale(5), lyx.Scale(5), lyx.Scale(5))
+    self.ConsoleOutput:DockMargin(lyx.Scale(5), lyx.Scale(5), lyx.Scale(5), lyx.Scale(45))
     self.ConsoleOutput:SetVerticalScrollbarEnabled(true)
     
     -- Command input
     local inputPanel = vgui.Create("DPanel", consolePanel)
     inputPanel:Dock(BOTTOM)
     inputPanel:SetTall(lyx.Scale(40))
+    inputPanel:DockMargin(lyx.Scale(5), 0, lyx.Scale(5), lyx.Scale(5))
     inputPanel.Paint = function() end
     
     local cmdInput = vgui.Create("lyx.TextEntry2", inputPanel)
     cmdInput:Dock(FILL)
-    cmdInput:DockMargin(lyx.Scale(5), lyx.Scale(5), lyx.Scale(100), lyx.Scale(5))
+    cmdInput:DockMargin(0, lyx.Scale(5), lyx.Scale(100), lyx.Scale(5))
     cmdInput:SetPlaceholderText("Enter console command...")
     
     local execBtn = vgui.Create("lyx.TextButton2", inputPanel)
     execBtn:SetText("Execute")
     execBtn:Dock(RIGHT)
     execBtn:SetWide(lyx.Scale(90))
-    execBtn:DockMargin(0, lyx.Scale(5), lyx.Scale(5), lyx.Scale(5))
+    execBtn:DockMargin(lyx.Scale(5), lyx.Scale(5), 0, lyx.Scale(5))
     execBtn.DoClick = function()
         local cmd = cmdInput:GetText()
         if cmd and cmd ~= "" then
@@ -102,7 +104,7 @@ function PANEL:Init()
 end
 
 function PANEL:Paint(w, h)
-    draw.RoundedBox(8, 0, 0, w, h, lyx.Colors.Background or Color(20, 20, 30))
+    draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
 end
 
 vgui.Register("LYX.Pages.Debug", PANEL)

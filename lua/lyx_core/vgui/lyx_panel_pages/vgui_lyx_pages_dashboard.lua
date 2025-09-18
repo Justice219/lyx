@@ -34,7 +34,16 @@ function PANEL:Init()
     statsContainer:Dock(TOP)
     statsContainer:SetTall(lyx.Scale(150))
     statsContainer:DockMargin(0, 0, 0, lyx.Scale(10))
-    statsContainer.Paint = function() end
+    statsContainer.Paint = function(pnl, w, h)
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+    end
+    
+    -- Create a layout for the stats
+    local statsLayout = vgui.Create("DIconLayout", statsContainer)
+    statsLayout:Dock(FILL)
+    statsLayout:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
+    statsLayout:SetSpaceX(lyx.Scale(10))
+    statsLayout:SetSpaceY(lyx.Scale(10))
     
     local stats = {
         {title = "Players Online", value = #player.GetAll() .. "/" .. game.MaxPlayers(), icon = "👥"},
@@ -44,18 +53,17 @@ function PANEL:Init()
     }
     
     for i, stat in ipairs(stats) do
-        local statPanel = vgui.Create("DButton", statsContainer)
+        local statPanel = vgui.Create("DButton", statsLayout)
         statPanel:SetText("")
-        statPanel:SetSize(statsContainer:GetWide() / 4 - lyx.Scale(7), lyx.Scale(140))
-        statPanel:SetPos((i-1) * (statsContainer:GetWide() / 4), 0)
+        statPanel:SetSize(lyx.Scale(280), lyx.Scale(120))
         statPanel.Paint = function(pnl, w, h)
             local hover = pnl:IsHovered() and 10 or 0
-            draw.RoundedBox(4, 0, 0, w - lyx.Scale(5), h, lyx.Colors.Background)
+            draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
             
             -- Hover effect
             if pnl:IsHovered() then
                 surface.SetDrawColor(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 50)
-                surface.DrawRect(0, 0, w - lyx.Scale(5), h)
+                surface.DrawRect(0, 0, w, h)
             end
             
             -- Stats

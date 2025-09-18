@@ -14,11 +14,12 @@ function PANEL:Init()
         draw.SimpleText("Rank Management", "LYX.Ranks.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
     end
     
-    -- Add rank button
+    -- Add rank button - use docking for proper positioning
     local addBtn = vgui.Create("lyx.TextButton2", headerPanel)
     addBtn:SetText("Add New Rank")
-    addBtn:SetSize(lyx.Scale(150), lyx.Scale(35))
-    addBtn:SetPos(headerPanel:GetWide() - lyx.Scale(170), lyx.Scale(12))
+    addBtn:Dock(RIGHT)
+    addBtn:DockMargin(0, lyx.Scale(12), lyx.Scale(12), lyx.Scale(12))
+    addBtn:SetWide(lyx.Scale(150))
     addBtn.DoClick = function()
         self:AddRankDialog()
     end
@@ -81,11 +82,10 @@ function PANEL:RefreshRanks()
                 draw.SimpleText("Standard Permissions", "LYX.Ranks.Text", lyx.Scale(200), lyx.Scale(22), lyx.Colors.DisabledText)
             end
             
-            -- Action buttons
+            -- Action buttons - delay positioning until panel has width
             local editBtn = vgui.Create("lyx.TextButton2", rankPanel)
             editBtn:SetText("Edit")
             editBtn:SetSize(lyx.Scale(80), lyx.Scale(30))
-            editBtn:SetPos(rankPanel:GetWide() - lyx.Scale(270), lyx.Scale(15))
             editBtn.DoClick = function()
                 self:EditRankDialog(rankName)
             end
@@ -93,7 +93,6 @@ function PANEL:RefreshRanks()
             local usersBtn = vgui.Create("lyx.TextButton2", rankPanel)
             usersBtn:SetText("View Users")
             usersBtn:SetSize(lyx.Scale(80), lyx.Scale(30))
-            usersBtn:SetPos(rankPanel:GetWide() - lyx.Scale(180), lyx.Scale(15))
             usersBtn.DoClick = function()
                 self:ShowRankUsers(rankName)
             end
@@ -101,7 +100,6 @@ function PANEL:RefreshRanks()
             local deleteBtn = vgui.Create("lyx.TextButton2", rankPanel)
             deleteBtn:SetText("Delete")
             deleteBtn:SetSize(lyx.Scale(80), lyx.Scale(30))
-            deleteBtn:SetPos(rankPanel:GetWide() - lyx.Scale(90), lyx.Scale(15))
             deleteBtn.DoClick = function()
                 Derma_Query("Are you sure you want to delete the rank '" .. rankName .. "'?", 
                     "Delete Rank",
@@ -114,6 +112,19 @@ function PANEL:RefreshRanks()
                     end,
                     "No", function() end
                 )
+            end
+            
+            -- Position buttons after panel has width
+            rankPanel.PerformLayout = function(pnl, w, h)
+                if editBtn and IsValid(editBtn) then
+                    editBtn:SetPos(w - lyx.Scale(270), lyx.Scale(15))
+                end
+                if usersBtn and IsValid(usersBtn) then
+                    usersBtn:SetPos(w - lyx.Scale(180), lyx.Scale(15))
+                end
+                if deleteBtn and IsValid(deleteBtn) then
+                    deleteBtn:SetPos(w - lyx.Scale(90), lyx.Scale(15))
+                end
             end
         end
     end

@@ -9,8 +9,8 @@ function PANEL:Init()
     headerPanel:SetTall(lyx.Scale(60))
     headerPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), 0)
     headerPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
-        draw.SimpleText("System Logs", "LYX.Logs.Header", lyx.Scale(15), lyx.Scale(20), Color(255, 255, 255))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+        draw.SimpleText("System Logs", "LYX.Logs.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
     end
     
     -- Clear logs button
@@ -53,7 +53,7 @@ function PANEL:LoadLogs()
 end
 
 function PANEL:Paint(w, h)
-    draw.RoundedBox(8, 0, 0, w, h, lyx.Colors.Background or Color(20, 20, 30))
+    draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
 end
 
 vgui.Register("LYX.Pages.Logs", PANEL)

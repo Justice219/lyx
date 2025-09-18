@@ -9,8 +9,8 @@ function PANEL:Init()
     headerPanel:SetTall(lyx.Scale(60))
     headerPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), 0)
     headerPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
-        draw.SimpleText("SQL Manager", "LYX.SQL.Header", lyx.Scale(15), lyx.Scale(20), Color(255, 255, 255))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+        draw.SimpleText("SQL Manager", "LYX.SQL.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
         
         -- Connection status
         local connected = sql.TableExists("lyx_settings") -- Check if connected by looking for lyx table
@@ -25,13 +25,13 @@ function PANEL:Init()
     queryPanel:SetTall(lyx.Scale(150))
     queryPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), 0)
     queryPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(40, 40, 50, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
     end
     
     local queryLabel = vgui.Create("DLabel", queryPanel)
     queryLabel:SetText("SQL Query:")
     queryLabel:SetFont("LYX.SQL.Text")
-    queryLabel:SetTextColor(Color(200, 200, 200))
+    queryLabel:SetTextColor(lyx.Colors.SecondaryText)
     queryLabel:SetPos(lyx.Scale(10), lyx.Scale(5))
     queryLabel:SizeToContents()
     
@@ -71,8 +71,8 @@ function PANEL:Init()
     resultsPanel:Dock(FILL)
     resultsPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
     resultsPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
-        draw.SimpleText("Query Results:", "LYX.SQL.Text", lyx.Scale(10), lyx.Scale(5), Color(200, 200, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+        draw.SimpleText("Query Results:", "LYX.SQL.Text", lyx.Scale(10), lyx.Scale(5), lyx.Colors.SecondaryText)
     end
     
     self.ResultsList = vgui.Create("DListView", resultsPanel)
@@ -86,8 +86,8 @@ function PANEL:Init()
     quickPanel:SetWide(lyx.Scale(200))
     quickPanel:DockMargin(0, lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
     quickPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(40, 40, 50, 200))
-        draw.SimpleText("Quick Queries", "LYX.SQL.Text", lyx.Scale(10), lyx.Scale(10), Color(200, 200, 200))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
+        draw.SimpleText("Quick Queries", "LYX.SQL.Text", lyx.Scale(10), lyx.Scale(10), lyx.Colors.PrimaryText)
     end
     
     local queries = {
@@ -157,7 +157,7 @@ function PANEL:ExecuteQuery(query)
 end
 
 function PANEL:Paint(w, h)
-    draw.RoundedBox(8, 0, 0, w, h, lyx.Colors.Background or Color(20, 20, 30))
+    draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
 end
 
 vgui.Register("LYX.Pages.SQL", PANEL)
