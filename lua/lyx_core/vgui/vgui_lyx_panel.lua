@@ -45,12 +45,22 @@ function PANEL:ChangeTab(pnl, tabName)
         self.ContentPanel:Remove()
     end
 
+    -- Check if the panel exists before trying to create it
+    if not vgui.GetControlTable(pnl) then
+        print("[Lyx] Warning: Panel '" .. pnl .. "' does not exist")
+        return
+    end
+
     self.ContentPanel = vgui.Create(pnl, self)
+    if self.ContentPanel then
         self.ContentPanel:Dock(FILL)
         self.ContentPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), lyx.Scale(10))
         self:SetTitle("Lyx: Revamped - " .. tabName)
-
-    self.SideBar:SelectItem(tabName)
+        
+        if self.SideBar then
+            self.SideBar:SelectItem(tabName)
+        end
+    end
 end
 
 vgui.Register("LYX.Menu", PANEL, "lyx.Frame2")

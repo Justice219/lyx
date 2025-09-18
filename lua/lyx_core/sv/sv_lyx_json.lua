@@ -80,9 +80,19 @@ do
         
         -- Atomic write: write to temp file first
         local tempName = name .. TEMP_SUFFIX
+        
+        -- Try to create directory if it doesn't exist
+        file.CreateDir("lyx")
+        
         local f = file.Open(tempName, "wb", "DATA")
         if not f then
-            lyx.Logger:Log("Failed to open temp file for writing: " .. tempName, 3)
+            -- Fallback: try direct write without temp file
+            file.Write(name, json)
+            if file.Exists(name, "DATA") then
+                lyx.Logger:Log("Used fallback direct write for: " .. name, 2)
+                return true
+            end
+            lyx.Logger:Log("Failed to write file: " .. name, 3)
             return false
         end
         

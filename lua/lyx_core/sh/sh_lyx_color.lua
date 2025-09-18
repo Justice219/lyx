@@ -134,10 +134,19 @@ do
 
     local lerp = Lerp
     function colorMeta:Lerp(t, to)
+        -- Ensure 'to' is a Color object
+        if type(to) == "number" then
+            -- If 'to' is a number, create a gray color
+            to = Color(to, to, to)
+        elseif not to or not to.r then
+            -- If 'to' is invalid, return self unchanged
+            return self
+        end
+        
         self.r = lerp(t, self.r, to.r)
         self.g = lerp(t, self.g, to.g)
         self.b = lerp(t, self.b, to.b)
-        self.a = lerp(t, self.a, to.a)
+        self.a = lerp(t, self.a, to.a or 255)
         return self
     end
 end

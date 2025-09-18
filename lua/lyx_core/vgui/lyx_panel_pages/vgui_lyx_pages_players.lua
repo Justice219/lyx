@@ -144,7 +144,7 @@ function PANEL:RefreshPlayers()
             ply:SteamID(),
             ply:GetUserGroup(),
             ply:Ping(),
-            string.NiceTime(ply:GetUTimeTotalTime and ply:GetUTimeTotalTime() or 0),
+            string.NiceTime(ply.GetUTimeTotalTime and ply:GetUTimeTotalTime() or 0),
             ply:Health(),
             ply:Armor(),
             ply:Frags(),

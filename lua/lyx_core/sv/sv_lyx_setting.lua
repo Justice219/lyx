@@ -206,7 +206,8 @@ do
             return false
         end
         
-        lyx.Logger:Log("Removed setting '" .. key .. "'")\n        return true
+        lyx.Logger:Log("Removed setting '" .. key .. "'")
+        return true
     end
     
     --[[
