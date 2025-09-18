@@ -134,14 +134,28 @@ do
 
     local lerp = Lerp
     function colorMeta:Lerp(t, to)
+        -- Validate t (fraction)
+        if type(t) ~= "number" then
+            -- If t is not a number, might be wrong argument order
+            if type(t) == "table" and t.r then
+                -- Arguments might be swapped, swap them back
+                t, to = to, t
+            else
+                return self
+            end
+        end
+        
         -- Ensure 'to' is a Color object
         if type(to) == "number" then
             -- If 'to' is a number, create a gray color
             to = Color(to, to, to)
-        elseif not to or not to.r then
+        elseif not to or type(to) ~= "table" or not to.r then
             -- If 'to' is invalid, return self unchanged
             return self
         end
+        
+        -- Clamp t between 0 and 1
+        t = math.Clamp(t, 0, 1)
         
         self.r = lerp(t, self.r, to.r)
         self.g = lerp(t, self.g, to.g)
