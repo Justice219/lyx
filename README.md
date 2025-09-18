@@ -60,10 +60,20 @@ lyx:HookRemove("lyx_test", test)                      -- Lets remove just to kee
 ```
 
 ## Documentation
-``Lyx`` contains some detailed documentation   that is still currently a work in progress.  
 
-Check it out
-[here](https://github.com/Justice219/lyx/wiki)
+### 📚 Official Documentation
+Complete documentation for LYX is available at:  
+**[https://xdjustice4.gitbook.io/lyx-docs/](https://xdjustice4.gitbook.io/lyx-docs/)**
+
+The documentation includes:
+- Getting started guides
+- Complete API reference
+- UI component documentation
+- Networking and database guides
+- Examples and best practices
+
+### Legacy Wiki
+The original wiki documentation can be found [here](https://github.com/Justice219/lyx/wiki)
 
 ### Real Project
 [Gamemaster 3](https://github.com/Justice219/gamemaster3) - A powerful gamemaster system created using almost everything lyx has to offer; A prime example of lyx's capabilities.
