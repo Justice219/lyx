@@ -15,23 +15,23 @@ function PANEL:Init()
     local sidebar = self:CreateSidebar("Dashboard", nil, nil, lyx.Scale(10), lyx.Scale(10))
 
     -- Main tabs available to all authorized users
-    sidebar:AddItem("Dashboard", "Dashboard", "NwmR5Gc", function() self:ChangeTab("LYX.Pages.Dashboard", "Dashboard") end)
-    sidebar:AddItem("Server Stats", "Server Stats", "xZyqNvP", function() self:ChangeTab("LYX.Pages.ServerStats", "Server Statistics") end)
-    sidebar:AddItem("Players", "Players", "kLmNpQr", function() self:ChangeTab("LYX.Pages.Players", "Player Management") end)
-    sidebar:AddItem("Performance", "Performance", "aBcDeFg", function() self:ChangeTab("LYX.Pages.Performance", "Performance Monitor") end)
-    sidebar:AddItem("Configuration", "Config", "hIjKlMn", function() self:ChangeTab("LYX.Pages.Config", "Configuration") end)
+    sidebar:AddItem("Dashboard", "Dashboard", "hEjgFlN", function() self:ChangeTab("LYX.Pages.Dashboard", "Dashboard") end)
+    sidebar:AddItem("Server Stats", "Server Stats", "Xxasicd", function() self:ChangeTab("LYX.Pages.ServerStats", "Server Statistics") end)
+    sidebar:AddItem("Players", "Players", "FIzNKgj", function() self:ChangeTab("LYX.Pages.Players", "Player Management") end)
+    sidebar:AddItem("Performance", "Performance", "tkoexR7", function() self:ChangeTab("LYX.Pages.Performance", "Performance Monitor") end)
+    sidebar:AddItem("Configuration", "Config", "NwmR5Gc", function() self:ChangeTab("LYX.Pages.Config", "Configuration") end)
     
     -- Admin/Superadmin only tabs
     if LocalPlayer():GetUserGroup() == "admin" or LocalPlayer():GetUserGroup() == "superadmin" then
-        sidebar:AddItem("Commands", "Commands", "oPqRsTu", function() self:ChangeTab("LYX.Pages.Commands", "Command Center") end)
-        sidebar:AddItem("Logs", "Logs", "vWxYzAb", function() self:ChangeTab("LYX.Pages.Logs", "System Logs") end)
+        sidebar:AddItem("Commands", "Commands", "Kcvop3T", function() self:ChangeTab("LYX.Pages.Commands", "Command Center") end)
+        sidebar:AddItem("Logs", "Logs", "fi4ItlE", function() self:ChangeTab("LYX.Pages.Logs", "System Logs") end)
     end
     
     -- Superadmin only tabs
     if LocalPlayer():GetUserGroup() == "superadmin" then
         sidebar:AddItem("Ranks", "Ranks", "J9YZQgp", function() self:ChangeTab("LYX.Pages.Ranks", "Rank Management") end)
-        sidebar:AddItem("Debug Tools", "Debug", "CdEfGhI", function() self:ChangeTab("LYX.Pages.Debug", "Debug Tools") end)
-        sidebar:AddItem("SQL Manager", "SQL", "jKlMnOp", function() self:ChangeTab("LYX.Pages.SQL", "SQL Manager") end)
+        sidebar:AddItem("Debug Tools", "Debug", "mtbhwRX", function() self:ChangeTab("LYX.Pages.Debug", "Debug Tools") end)
+        sidebar:AddItem("SQL Manager", "SQL", "laJHKtH", function() self:ChangeTab("LYX.Pages.SQL", "SQL Manager") end)
     end
     
     -- Developer mode tabs (optional)
