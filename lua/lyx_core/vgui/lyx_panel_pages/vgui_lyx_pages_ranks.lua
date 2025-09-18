@@ -153,22 +153,70 @@ function PANEL:AddRankDialog()
     nameEntry:SetPos(lyx.Scale(20), lyx.Scale(80))
     nameEntry:SetPlaceholderText("Enter rank name...")
     
-    local addBtn = vgui.Create("lyx.TextButton2", frame)
+    -- Create button panel to ensure proper parenting
+    local buttonPanel = vgui.Create("DPanel", frame)
+    buttonPanel:Dock(BOTTOM)
+    buttonPanel:SetTall(lyx.Scale(50))
+    buttonPanel.Paint = function() end
+    
+    local addBtn = vgui.Create("lyx.TextButton2", buttonPanel)
     addBtn:SetText("Add Rank")
     addBtn:SetSize(lyx.Scale(100), lyx.Scale(35))
-    addBtn:SetPos(lyx.Scale(150), lyx.Scale(130))
-    addBtn.DoClick = function()
+    addBtn:Dock(LEFT)
+    addBtn:DockMargin(lyx.Scale(50), lyx.Scale(7), lyx.Scale(5), lyx.Scale(7))
+    
+    -- Test with basic DButton first to see if it's a lyx.TextButton2 issue
+    addBtn.DoClick = function(btn)
+        print("[DEBUG] Add Rank button clicked!")
         local rankName = nameEntry:GetText()
+        print("[DEBUG] Rank name from entry: '" .. tostring(rankName) .. "'")
+        
         if rankName and rankName ~= "" then
+            print("[DEBUG] Sending rank add request for: " .. rankName)
+            
             net.Start("lyx:rank:add")
             net.WriteString(rankName)
             net.SendToServer()
             
-            frame:Close()
-            self:RefreshRanks()
-            
             notification.AddLegacy("Rank '" .. rankName .. "' added!", NOTIFY_GENERIC, 3)
+            
+            frame:Close()
+            
+            timer.Simple(0.5, function()
+                if IsValid(self) then
+                    self:RefreshRanks()
+                end
+            end)
+        else
+            print("[DEBUG] Rank name was empty or nil")
+            notification.AddLegacy("Please enter a rank name!", NOTIFY_ERROR, 3)
         end
+    end
+    
+    print("[DEBUG] Add button created, DoClick = ", addBtn.DoClick)
+    
+    -- Add cancel button
+    local cancelBtn = vgui.Create("lyx.TextButton2", buttonPanel)
+    cancelBtn:SetText("Cancel")
+    cancelBtn:SetSize(lyx.Scale(100), lyx.Scale(35))
+    cancelBtn:Dock(LEFT)
+    cancelBtn:DockMargin(lyx.Scale(5), lyx.Scale(7), lyx.Scale(5), lyx.Scale(7))
+    cancelBtn.DoClick = function(btn)
+        print("[DEBUG] Cancel button clicked")
+        frame:Close()
+    end
+    
+    print("[DEBUG] Cancel button created, DoClick = ", cancelBtn.DoClick)
+    
+    -- Test button to verify buttons work at all
+    local testBtn = vgui.Create("DButton", buttonPanel)
+    testBtn:SetText("Test")
+    testBtn:SetSize(lyx.Scale(60), lyx.Scale(35))
+    testBtn:Dock(RIGHT)
+    testBtn:DockMargin(lyx.Scale(5), lyx.Scale(7), lyx.Scale(50), lyx.Scale(7))
+    testBtn.DoClick = function()
+        print("[DEBUG] Test DButton clicked!")
+        notification.AddLegacy("Test button works!", NOTIFY_GENERIC, 2)
     end
 end
 
