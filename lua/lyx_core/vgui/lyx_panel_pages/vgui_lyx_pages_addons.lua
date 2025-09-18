@@ -12,14 +12,14 @@ function PANEL:Init()
     headerPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), 0)
     headerPanel.Paint = function(pnl, w, h)
         draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
-        draw.SimpleText("Registered Addons", "LYX.Addons.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
+        draw.SimpleText("Lyx Addons", "LYX.Addons.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
         
         -- Count
         local addonCount = 0
         if lyx.addons then
             addonCount = table.Count(lyx.addons)
         end
-        draw.SimpleText(addonCount .. " addons loaded", "LYX.Addons.Text", w - lyx.Scale(150), lyx.Scale(22), lyx.Colors.SecondaryText)
+        draw.SimpleText(addonCount .. " Lyx addons loaded", "LYX.Addons.Text", w - lyx.Scale(150), lyx.Scale(22), lyx.Colors.SecondaryText)
     end
     
     -- Refresh button
@@ -66,7 +66,7 @@ function PANEL:RefreshAddons()
         end
     end
     
-    -- Get list of addons
+    -- Get list of Lyx addons only
     local addons = {}
     
     -- Check Lyx registered addons
@@ -82,31 +82,6 @@ function PANEL:RefreshAddons()
         end
     end
     
-    -- Check for GM3 if it exists
-    if gm3 and gm3.tools then
-        table.insert(addons, {
-            name = "GameMaster 3",
-            type = "External",
-            version = "1.4",
-            author = "Justice#4956",
-            description = "Gamemastering tool for events"
-        })
-    end
-    
-    -- Check engine addons
-    local engineAddons = engine.GetAddons()
-    for _, addon in ipairs(engineAddons) do
-        if addon.mounted then
-            table.insert(addons, {
-                name = addon.title,
-                type = "Workshop",
-                version = "ID: " .. addon.wsid,
-                author = "Workshop",
-                description = "Workshop addon"
-            })
-        end
-    end
-    
     -- Sort by name
     table.sort(addons, function(a, b) return a.name < b.name end)
     
@@ -118,13 +93,8 @@ function PANEL:RefreshAddons()
         addonPanel:DockMargin(0, 0, lyx.Scale(10), lyx.Scale(5))
         addonPanel.IsAddonPanel = true
         
-        -- Determine color based on type
-        local typeColor = lyx.Colors.DisabledText
-        if addon.type == "Lyx Addon" then
-            typeColor = lyx.Colors.Positive
-        elseif addon.type == "External" then
-            typeColor = Color(52, 152, 219)
-        end
+        -- Lyx addons are always green
+        local typeColor = lyx.Colors.Positive or Color(46, 204, 113)
         
         addonPanel.Paint = function(pnl, w, h)
             draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)

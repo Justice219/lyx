@@ -45,25 +45,19 @@ function PANEL:Init()
         {title = "Players Online", value = #player.GetAll() .. "/" .. game.MaxPlayers()},
         {title = "Server Uptime", value = string.NiceTime(CurTime())},
         {title = "Active Hooks", value = table.Count(hook.GetTable() or {})},
-        {title = "Map", value = game.GetMap()}
+        {title = "Map", value = string.sub(game.GetMap(), 1, 20)}
     }
     
     for i, stat in ipairs(stats) do
-        local statPanel = vgui.Create("DButton", statsLayout)
-        statPanel:SetText("")
+        local statPanel = vgui.Create("DPanel", statsLayout)
         statPanel:SetSize(lyx.Scale(280), lyx.Scale(120))
         statPanel.Paint = function(pnl, w, h)
-            local hover = pnl:IsHovered() and 10 or 0
             draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
             
-            -- Hover effect
-            if pnl:IsHovered() then
-                draw.RoundedBox(4, 0, 0, w, h, Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 30))
-            end
             
             -- Stats
-            draw.SimpleText(stat.title, "LYX.Dashboard.Text", lyx.Scale(10), lyx.Scale(15), lyx.Colors.SecondaryText)
-            draw.SimpleText(stat.value, "LYX.Dashboard.Header", lyx.Scale(10), lyx.Scale(40), lyx.Colors.PrimaryText)
+            draw.SimpleText(stat.title, "LYX.Dashboard.Text", lyx.Scale(10), lyx.Scale(30), lyx.Colors.SecondaryText)
+            draw.SimpleText(stat.value, "LYX.Dashboard.Header", lyx.Scale(10), lyx.Scale(55), lyx.Colors.PrimaryText)
         end
     end
     
@@ -74,7 +68,7 @@ function PANEL:Init()
     actionsPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     actionsPanel.Paint = function(pnl, w, h)
         draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
-        draw.SimpleText("Quick Actions", "LYX.Dashboard.Header", lyx.Scale(15), lyx.Scale(10), lyx.Colors.PrimaryText)
+        draw.SimpleText("Quick Actions", "LYX.Dashboard.Header", lyx.Scale(15), lyx.Scale(15), lyx.Colors.PrimaryText)
     end
     
     local actions = {
