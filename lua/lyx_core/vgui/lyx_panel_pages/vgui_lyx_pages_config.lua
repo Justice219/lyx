@@ -137,7 +137,11 @@ function PANEL:AddSetting(type, key, label, default, min, max)
     -- Label
     local lbl = vgui.Create("DLabel", settingPanel)
     lbl:SetText(label)
-    lbl:SetFont("LYX.Config.Text")
+    if lyx.GetRealFont then
+        lbl:SetFont(lyx.GetRealFont("LYX.Config.Text") or "DermaDefault")
+    else
+        lbl:SetFont("DermaDefault")
+    end
     lbl:SetTextColor(Color(200, 200, 200))
     lbl:SetPos(lyx.Scale(15), lyx.Scale(15))
     lbl:SizeToContents()
@@ -163,15 +167,16 @@ function PANEL:AddSetting(type, key, label, default, min, max)
             self:MarkUnsaved()
         end
     elseif type == "number" then
-        control = vgui.Create("lyx.Slider2", settingPanel)
-        control:SetSize(lyx.Scale(300), lyx.Scale(30))
-        control:SetPos(settingPanel:GetWide() - lyx.Scale(320), lyx.Scale(10))
-        control:SetMin(min or 0)
-        control:SetMax(max or 100)
-        control:SetValue(default)
-        control:SetDecimals(0)
-        control.OnValueChanged = function(s, val)
-            value = math.Round(val)
+        control = vgui.Create("lyx.TextEntry2", settingPanel)
+        control:SetSize(lyx.Scale(100), lyx.Scale(30))
+        control:SetPos(settingPanel:GetWide() - lyx.Scale(120), lyx.Scale(10))
+        control:SetText(tostring(default))
+        control:SetNumeric(true)
+        control.OnChange = function(s)
+            local val = tonumber(s:GetText()) or default
+            if min and val < min then val = min end
+            if max and val > max then val = max end
+            value = val
             self:MarkUnsaved()
         end
     end
