@@ -148,6 +148,9 @@ do
             lyx.Logger:Log("Created new setting '" .. key .. "'")
         end
         
+        -- Trigger setting changed hook
+        hook.Run("Lyx.SettingChanged", key, value)
+        
         return true
     end
     
