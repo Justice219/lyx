@@ -225,15 +225,16 @@ function PANEL:RefreshRanks(ranks)
     
     print("[DEBUG] ListView now has " .. self.RanksList:GetRowCount() .. " rows")
     
-    -- Debug: Check the container and scroll panel
-    if self.RanksList.RowContainer then
-        print("[DEBUG] RowContainer height: " .. self.RanksList.RowContainer:GetTall())
-        print("[DEBUG] RowContainer visible: " .. tostring(self.RanksList.RowContainer:IsVisible()))
-    end
-    
+    -- Debug: Check the scroll panel and canvas
     if self.RanksList.ScrollPanel then
         print("[DEBUG] ScrollPanel size: " .. self.RanksList.ScrollPanel:GetWide() .. "x" .. self.RanksList.ScrollPanel:GetTall())
         print("[DEBUG] ScrollPanel visible: " .. tostring(self.RanksList.ScrollPanel:IsVisible()))
+        
+        local canvas = self.RanksList.ScrollPanel:GetCanvas()
+        if canvas then
+            print("[DEBUG] Canvas height: " .. canvas:GetTall())
+            print("[DEBUG] Canvas visible: " .. tostring(canvas:IsVisible()))
+        end
     end
 end
 
