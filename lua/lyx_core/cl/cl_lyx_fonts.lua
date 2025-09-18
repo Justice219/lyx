@@ -72,3 +72,25 @@ do
         return registeredFonts[font]
     end
 end
+
+-- Override draw.SimpleText to support lyx fonts
+local oldSimpleText = draw.SimpleText
+function draw.SimpleText(text, font, x, y, color, xalign, yalign)
+    -- Check if this is a lyx font
+    local lyxFont = lyx.GetRealFont(font)
+    if lyxFont then
+        font = lyxFont
+    end
+    return oldSimpleText(text, font, x, y, color, xalign, yalign)
+end
+
+-- Override draw.SimpleTextOutlined to support lyx fonts  
+local oldSimpleTextOutlined = draw.SimpleTextOutlined
+function draw.SimpleTextOutlined(text, font, x, y, color, xalign, yalign, outlinewidth, outlinecolor)
+    -- Check if this is a lyx font
+    local lyxFont = lyx.GetRealFont(font)
+    if lyxFont then
+        font = lyxFont
+    end
+    return oldSimpleTextOutlined(text, font, x, y, color, xalign, yalign, outlinewidth, outlinecolor)
+end
