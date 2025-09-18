@@ -134,34 +134,33 @@ function PANEL:Init()
         menu:AddOption("Copy SteamID", function()
             SetClipboardText(ply:SteamID())
             notification.AddLegacy("SteamID copied to clipboard!", NOTIFY_GENERIC, 2)
-        end):SetIcon("icon16/page_copy.png")
+        end)
         
         menu:AddOption("Copy SteamID64", function()
             SetClipboardText(ply:SteamID64())
             notification.AddLegacy("SteamID64 copied to clipboard!", NOTIFY_GENERIC, 2)
-        end):SetIcon("icon16/page_copy.png")
+        end)
         
         menu:AddOption("Copy Name", function()
             SetClipboardText(ply:Nick())
             notification.AddLegacy("Name copied to clipboard!", NOTIFY_GENERIC, 2)
-        end):SetIcon("icon16/page_copy.png")
+        end)
         
         menu:AddSpacer()
         
         menu:AddOption("View Profile", function()
             ply:ShowProfile()
-        end):SetIcon("icon16/user.png")
+        end)
         
         menu:AddOption("Spectate", function()
             RunConsoleCommand("ulx", "spectate", ply:Nick())
-        end):SetIcon("icon16/eye.png")
+        end)
         
         -- Admin actions
         if LocalPlayer():IsAdmin() then
             menu:AddSpacer()
             
             local adminMenu = menu:AddSubMenu("Admin Actions")
-            adminMenu:SetIcon("icon16/shield.png")
             
             adminMenu:AddOption("Kick", function()
                 Derma_StringRequest("Kick Player", "Enter kick reason:", "", function(reason)
@@ -170,7 +169,7 @@ function PANEL:Init()
                     net.WriteString(reason or "No reason provided")
                     net.SendToServer()
                 end)
-            end):SetIcon("icon16/door_out.png")
+            end)
             
             adminMenu:AddOption("Ban", function()
                 Derma_StringRequest("Ban Player", "Enter ban duration (minutes, 0 = perma):", "60", function(time)
@@ -182,31 +181,31 @@ function PANEL:Init()
                         net.SendToServer()
                     end)
                 end)
-            end):SetIcon("icon16/delete.png")
+            end)
             
             adminMenu:AddOption("Freeze", function()
                 net.Start("lyx:admin:freeze")
                 net.WriteEntity(ply)
                 net.SendToServer()
-            end):SetIcon("icon16/lock.png")
+            end)
             
             adminMenu:AddOption("Teleport To", function()
                 net.Start("lyx:admin:goto")
                 net.WriteEntity(ply)
                 net.SendToServer()
-            end):SetIcon("icon16/arrow_right.png")
+            end)
             
             adminMenu:AddOption("Bring", function()
                 net.Start("lyx:admin:bring")
                 net.WriteEntity(ply)
                 net.SendToServer()
-            end):SetIcon("icon16/arrow_left.png")
+            end)
             
             adminMenu:AddOption("Return", function()
                 net.Start("lyx:admin:return")
                 net.WriteEntity(ply)
                 net.SendToServer()
-            end):SetIcon("icon16/arrow_undo.png")
+            end)
             
             -- Punishment submenu
             local punishMenu = adminMenu:AddSubMenu("Punishments")
@@ -215,7 +214,7 @@ function PANEL:Init()
                 net.Start("lyx:admin:slay")
                 net.WriteEntity(ply)
                 net.SendToServer()
-            end):SetIcon("icon16/bomb.png")
+            end)
             
             punishMenu:AddOption("Slap", function()
                 Derma_StringRequest("Slap Player", "Enter damage amount:", "10", function(damage)
@@ -224,7 +223,7 @@ function PANEL:Init()
                     net.WriteUInt(tonumber(damage) or 10, 8)
                     net.SendToServer()
                 end)
-            end):SetIcon("icon16/hand_paper.png")
+            end)
             
             punishMenu:AddOption("Ignite", function()
                 Derma_StringRequest("Ignite Player", "Enter duration (seconds):", "10", function(duration)
@@ -233,7 +232,7 @@ function PANEL:Init()
                     net.WriteUInt(tonumber(duration) or 10, 8)
                     net.SendToServer()
                 end)
-            end):SetIcon("icon16/fire.png")
+            end)
         end
         
         -- Superadmin actions
@@ -241,7 +240,6 @@ function PANEL:Init()
             menu:AddSpacer()
             
             local rankMenu = menu:AddSubMenu("Set Rank")
-            rankMenu:SetIcon("icon16/user_edit.png")
             
             local ranks = {"user", "vip", "moderator", "operator", "admin", "superadmin"}
             
@@ -266,14 +264,13 @@ function PANEL:Init()
                             self:RefreshPlayers()
                         end
                     end)
-                end):SetIcon(icon)
+                end)
             end
             
             menu:AddSpacer()
             
             -- Give weapons submenu
             local weaponMenu = menu:AddSubMenu("Give Weapon")
-            weaponMenu:SetIcon("icon16/gun.png")
             
             local weapons = {
                 {"Physgun", "weapon_physgun"},
