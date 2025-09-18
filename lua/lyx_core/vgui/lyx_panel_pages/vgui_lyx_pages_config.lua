@@ -150,10 +150,12 @@ function PANEL:AddSetting(type, key, label, default, min, max)
     local control
     
     if type == "bool" then
-        control = vgui.Create("lyx.CheckBox2", settingPanel)
+        control = vgui.Create("lyx.Checkbox2", settingPanel)
         control:SetPos(settingPanel:GetWide() - lyx.Scale(60), lyx.Scale(12))
-        control:SetChecked(default)
-        control.OnChange = function(s, val)
+        control:SetSize(lyx.Scale(25), lyx.Scale(25))
+        control:SetToggle(default)
+        control.DoClick = function(s)
+            local val = s:GetToggle()
             value = val
             self:MarkUnsaved()
         end
@@ -217,7 +219,7 @@ function PANEL:ResetSettings()
     for key, data in pairs(self.Settings) do
         data.value = data.default
         if data.type == "bool" then
-            data.control:SetChecked(data.default)
+            data.control:SetToggle(data.default)
         elseif data.type == "string" then
             data.control:SetText(data.default)
         elseif data.type == "number" then
@@ -249,7 +251,7 @@ function PANEL:ImportSettings()
                     self.Settings[key].value = value
                     local data = self.Settings[key]
                     if data.type == "bool" then
-                        data.control:SetChecked(value)
+                        data.control:SetToggle(value)
                     elseif data.type == "string" then
                         data.control:SetText(value)
                     elseif data.type == "number" then
