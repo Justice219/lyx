@@ -63,12 +63,14 @@ function PANEL:AddColumn(name, width)
         end
         
         -- Draw text
-        draw.SimpleText(name, "LYX.List.Header", lyx.Scale(10), h/2, lyx.Colors.PrimaryText, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+        local font = lyx.GetRealFont and lyx.GetRealFont("LYX.List.Header") or "DermaDefault"
+        draw.SimpleText(name, font, lyx.Scale(10), h/2, lyx.Colors.PrimaryText, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
         
         -- Draw sort indicator
         if self.SortColumn == header.Index then
             local indicator = self.SortDescending and "▼" or "▲"
-            draw.SimpleText(indicator, "LYX.List.Header", w - lyx.Scale(10), h/2, lyx.Colors.SecondaryText, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+            local font = lyx.GetRealFont and lyx.GetRealFont("LYX.List.Header") or "DermaDefault"
+            draw.SimpleText(indicator, font, w - lyx.Scale(10), h/2, lyx.Colors.SecondaryText, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
         end
     end
     
@@ -118,7 +120,8 @@ function PANEL:AddRow(...)
         local x = 0
         for i, header in ipairs(self.Headers) do
             local value = values[i] or ""
-            draw.SimpleText(tostring(value), "LYX.List.Text", x + lyx.Scale(10), h/2, lyx.Colors.SecondaryText, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+            local font = lyx.GetRealFont and lyx.GetRealFont("LYX.List.Text") or "DermaDefault"
+            draw.SimpleText(tostring(value), font, x + lyx.Scale(10), h/2, lyx.Colors.SecondaryText, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
             x = x + header.Width
         end
     end

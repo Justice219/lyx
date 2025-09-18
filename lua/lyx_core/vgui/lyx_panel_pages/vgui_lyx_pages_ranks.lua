@@ -93,46 +93,8 @@ function PANEL:Init()
     self.RanksList:AddColumn("Type", lyx.Scale(100))
     self.RanksList:AddColumn("Actions", lyx.Scale(200))
     
-    -- Override row painting for rank colors
-    local oldAddRow = self.RanksList.AddRow
-    self.RanksList.AddRow = function(list, ...)
-        local row = oldAddRow(list, ...)
-        local values = {...}
-        local rankName = values[1]
-        
-        -- Store rank data in row
-        row.RankName = rankName
-        
-        -- Override paint for rank coloring
-        local oldPaint = row.Paint
-        row.Paint = function(pnl, w, h)
-            -- Background
-            local bgColor = lyx.Colors.Background
-            
-            if pnl == list.SelectedRow then
-                bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 40)
-            elseif pnl:IsHovered() then
-                bgColor = Color(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 20)
-            end
-            
-            draw.RoundedBox(4, 0, 0, w, h, bgColor)
-            
-            -- Rank color indicator
-            local rankColor = self:GetRankColor(rankName)
-            draw.RoundedBox(2, 0, 0, lyx.Scale(3), h, rankColor)
-            
-            -- Draw values
-            local x = lyx.Scale(5)
-            for i, header in ipairs(list.Headers) do
-                local value = values[i] or ""
-                local textColor = (i == 1) and rankColor or lyx.Colors.SecondaryText
-                draw.SimpleText(tostring(value), "LYX.List.Text", x + lyx.Scale(10), h/2, textColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-                x = x + header.Width
-            end
-        end
-        
-        return row
-    end
+    -- Don't override row painting for now - use default to test
+    -- We'll add custom painting after confirming rows display
     
     -- Right-click menu
     self.RanksList.OnRowRightClick = function(list, index, row)
@@ -249,14 +211,30 @@ function PANEL:RefreshRanks(ranks)
             "Manage"
         )
         
+        -- Store rank name for right-click menu
         if row then
+            row.RankName = rankName
             print("[DEBUG] Row added successfully for " .. rankName)
+            print("[DEBUG] Row position: " .. tostring(row:GetPos()))
+            print("[DEBUG] Row size: " .. row:GetWide() .. "x" .. row:GetTall())
+            print("[DEBUG] Row visible: " .. tostring(row:IsVisible()))
         else
             print("[DEBUG] Failed to add row for " .. rankName)
         end
     end
     
     print("[DEBUG] ListView now has " .. self.RanksList:GetRowCount() .. " rows")
+    
+    -- Debug: Check the container and scroll panel
+    if self.RanksList.RowContainer then
+        print("[DEBUG] RowContainer height: " .. self.RanksList.RowContainer:GetTall())
+        print("[DEBUG] RowContainer visible: " .. tostring(self.RanksList.RowContainer:IsVisible()))
+    end
+    
+    if self.RanksList.ScrollPanel then
+        print("[DEBUG] ScrollPanel size: " .. self.RanksList.ScrollPanel:GetWide() .. "x" .. self.RanksList.ScrollPanel:GetTall())
+        print("[DEBUG] ScrollPanel visible: " .. tostring(self.RanksList.ScrollPanel:IsVisible()))
+    end
 end
 
 function PANEL:GetRankColor(rankName)
