@@ -53,8 +53,8 @@ function PANEL:Init()
     -- General Settings
     local generalPanel = vgui.Create("DPanel", self.ScrollPanel)
     generalPanel:Dock(TOP)
-    generalPanel:SetTall(lyx.Scale(280))
-    generalPanel:DockMargin(0, 0, lyx.Scale(10), lyx.Scale(10))
+    generalPanel:SetTall(lyx.Scale(300))
+    generalPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     generalPanel.Paint = function(pnl, w, h)
         draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         draw.SimpleText("General Settings", "LYX.Config.Header", lyx.Scale(15), lyx.Scale(15), lyx.Colors.PrimaryText)
@@ -73,8 +73,8 @@ function PANEL:Init()
     serverNameLabel:SizeToContents()
     
     local serverNameEntry = vgui.Create("lyx.TextEntry2", generalPanel)
-    serverNameEntry:SetPos(lyx.Scale(15), lyx.Scale(75))
-    serverNameEntry:SetSize(lyx.Scale(350), lyx.Scale(30))
+    serverNameEntry:SetPos(lyx.Scale(150), lyx.Scale(48))
+    serverNameEntry:SetSize(lyx.Scale(250), lyx.Scale(30))
     serverNameEntry:SetPlaceholderText("Enter server name...")
     serverNameEntry.OnChange = function(s)
         self.Settings["server_name"] = s:GetText()
@@ -84,7 +84,7 @@ function PANEL:Init()
     -- Welcome Message
     local welcomeLabel = vgui.Create("DLabel", generalPanel)
     welcomeLabel:SetText("Welcome Message:")
-    welcomeLabel:SetPos(lyx.Scale(15), lyx.Scale(120))
+    welcomeLabel:SetPos(lyx.Scale(15), lyx.Scale(95))
     if lyx.GetRealFont then
         welcomeLabel:SetFont(lyx.GetRealFont("LYX.Config.Text") or "DermaDefault")
     else
@@ -94,8 +94,8 @@ function PANEL:Init()
     welcomeLabel:SizeToContents()
     
     local welcomeEntry = vgui.Create("lyx.TextEntry2", generalPanel)
-    welcomeEntry:SetPos(lyx.Scale(15), lyx.Scale(145))
-    welcomeEntry:SetSize(lyx.Scale(350), lyx.Scale(30))
+    welcomeEntry:SetPos(lyx.Scale(150), lyx.Scale(93))
+    welcomeEntry:SetSize(lyx.Scale(250), lyx.Scale(30))
     welcomeEntry:SetPlaceholderText("Enter welcome message...")
     welcomeEntry.OnChange = function(s)
         self.Settings["welcome_message"] = s:GetText()
@@ -104,7 +104,7 @@ function PANEL:Init()
     
     -- Enable Logging checkbox
     local loggingCheck = vgui.Create("lyx.Checkbox2", generalPanel)
-    loggingCheck:SetPos(lyx.Scale(15), lyx.Scale(190))
+    loggingCheck:SetPos(lyx.Scale(15), lyx.Scale(140))
     loggingCheck.OnToggled = function(s, val)
         self.Settings["enable_logging"] = val
     end
@@ -112,7 +112,7 @@ function PANEL:Init()
     
     local loggingLabel = vgui.Create("DLabel", generalPanel)
     loggingLabel:SetText("Enable System Logging")
-    loggingLabel:SetPos(lyx.Scale(45), lyx.Scale(192))
+    loggingLabel:SetPos(lyx.Scale(45), lyx.Scale(142))
     if lyx.GetRealFont then
         loggingLabel:SetFont(lyx.GetRealFont("LYX.Config.Text") or "DermaDefault")
     else
@@ -123,7 +123,7 @@ function PANEL:Init()
     
     -- Enable Debug Mode checkbox
     local debugCheck = vgui.Create("lyx.Checkbox2", generalPanel)
-    debugCheck:SetPos(lyx.Scale(15), lyx.Scale(225))
+    debugCheck:SetPos(lyx.Scale(15), lyx.Scale(170))
     debugCheck.OnToggled = function(s, val)
         self.Settings["debug_mode"] = val
     end
@@ -131,7 +131,7 @@ function PANEL:Init()
     
     local debugLabel = vgui.Create("DLabel", generalPanel)
     debugLabel:SetText("Enable Debug Mode")
-    debugLabel:SetPos(lyx.Scale(45), lyx.Scale(227))
+    debugLabel:SetPos(lyx.Scale(45), lyx.Scale(172))
     if lyx.GetRealFont then
         debugLabel:SetFont(lyx.GetRealFont("LYX.Config.Text") or "DermaDefault")
     else
@@ -143,8 +143,8 @@ function PANEL:Init()
     -- Security Settings
     local securityPanel = vgui.Create("DPanel", self.ScrollPanel)
     securityPanel:Dock(TOP)
-    securityPanel:SetTall(lyx.Scale(220))
-    securityPanel:DockMargin(0, 0, lyx.Scale(10), lyx.Scale(10))
+    securityPanel:SetTall(lyx.Scale(200))
+    securityPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     securityPanel.Paint = function(pnl, w, h)
         draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         draw.SimpleText("Security Settings", "LYX.Config.Header", lyx.Scale(15), lyx.Scale(15), lyx.Colors.PrimaryText)
@@ -201,8 +201,8 @@ function PANEL:Init()
     maxRateLabel:SizeToContents()
     
     local maxRateEntry = vgui.Create("lyx.TextEntry2", securityPanel)
-    maxRateEntry:SetPos(lyx.Scale(15), lyx.Scale(150))
-    maxRateEntry:SetSize(lyx.Scale(100), lyx.Scale(30))
+    maxRateEntry:SetPos(lyx.Scale(200), lyx.Scale(123))
+    maxRateEntry:SetSize(lyx.Scale(80), lyx.Scale(30))
     maxRateEntry:SetNumeric(true)
     maxRateEntry:SetPlaceholderText("60")
     maxRateEntry.OnChange = function(s)
@@ -216,8 +216,8 @@ function PANEL:Init()
     -- Performance Settings
     local perfPanel = vgui.Create("DPanel", self.ScrollPanel)
     perfPanel:Dock(TOP)
-    perfPanel:SetTall(lyx.Scale(200))
-    perfPanel:DockMargin(0, 0, lyx.Scale(10), lyx.Scale(10))
+    perfPanel:SetTall(lyx.Scale(180))
+    perfPanel:DockMargin(0, 0, 0, lyx.Scale(10))
     perfPanel.Paint = function(pnl, w, h)
         draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
         draw.SimpleText("Performance Settings", "LYX.Config.Header", lyx.Scale(15), lyx.Scale(15), lyx.Colors.PrimaryText)
@@ -236,8 +236,8 @@ function PANEL:Init()
     cacheLabel:SizeToContents()
     
     local cacheEntry = vgui.Create("lyx.TextEntry2", perfPanel)
-    cacheEntry:SetPos(lyx.Scale(15), lyx.Scale(75))
-    cacheEntry:SetSize(lyx.Scale(100), lyx.Scale(30))
+    cacheEntry:SetPos(lyx.Scale(200), lyx.Scale(48))
+    cacheEntry:SetSize(lyx.Scale(80), lyx.Scale(30))
     cacheEntry:SetNumeric(true)
     cacheEntry:SetPlaceholderText("300")
     cacheEntry.OnChange = function(s)

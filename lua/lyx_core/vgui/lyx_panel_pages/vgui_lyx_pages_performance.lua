@@ -54,7 +54,7 @@ function PANEL:Init()
             local y1 = lyx.Scale(10) + graphH - (pnl.fpsHistory[i-1] / 144) * graphH
             local y2 = lyx.Scale(10) + graphH - (pnl.fpsHistory[i] / 144) * graphH
             
-            surface.SetDrawColor(52, 152, 219, 255)
+            surface.SetDrawColor(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 255)
             surface.DrawLine(x1, y1, x2, y2)
         end
     end
@@ -71,7 +71,7 @@ function PANEL:Init()
         
         local memUsage = collectgarbage("count") / 1024  -- Convert to MB
         draw.SimpleText(math.Round(memUsage, 2) .. " MB", "LYX.Perf.Number", 
-            lyx.Scale(15), lyx.Scale(40), Color(155, 89, 182))
+            lyx.Scale(15), lyx.Scale(40), lyx.Colors.Primary or Color(155, 89, 182))
         
         -- Memory bar
         local barX = lyx.Scale(150)
@@ -83,11 +83,11 @@ function PANEL:Init()
         surface.DrawRect(barX, barY, barW, barH)
         
         local memPercent = math.min(memUsage / 512, 1)  -- Assume 512MB max
-        surface.SetDrawColor(155, 89, 182, 255)
+        surface.SetDrawColor(lyx.Colors.Primary.r, lyx.Colors.Primary.g, lyx.Colors.Primary.b, 255)
         surface.DrawRect(barX, barY, barW * memPercent, barH)
         
         draw.SimpleText(math.Round(memPercent * 100) .. "%", "LYX.Perf.Text", 
-            barX + barW / 2, barY + barH / 2, Color(255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            barX + barW / 2, barY + barH / 2, lyx.Colors.PrimaryText, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
     
     -- Hook Performance
@@ -105,6 +105,11 @@ function PANEL:Init()
         hookList:Dock(FILL)
         hookList:DockMargin(lyx.Scale(10), lyx.Scale(40), lyx.Scale(10), lyx.Scale(10))
         hookList:SetMultiSelect(false)
+        
+        -- Style the list
+        hookList.Paint = function(pnl, w, h)
+            draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
+        end
         hookList:AddColumn("Hook Name"):SetWidth(lyx.Scale(200))
         hookList:AddColumn("Calls"):SetWidth(lyx.Scale(80))
         hookList:AddColumn("Avg Time (ms)"):SetWidth(lyx.Scale(120))
@@ -139,11 +144,11 @@ function PANEL:Init()
         end
         
         local stats = {
-            {"Total Entities", #entities, Color(52, 152, 219)},
-            {"Props", props, Color(46, 204, 113)},
-            {"NPCs", npcs, Color(241, 196, 15)},
+            {"Total Entities", #entities, lyx.Colors.Primary or Color(52, 152, 219)},
+            {"Props", props, lyx.Colors.Positive or Color(46, 204, 113)},
+            {"NPCs", npcs, lyx.Colors.Warning or Color(241, 196, 15)},
             {"Weapons", weapons, Color(155, 89, 182)},
-            {"Vehicles", vehicles, Color(231, 76, 60)}
+            {"Vehicles", vehicles, lyx.Colors.Negative or Color(231, 76, 60)}
         }
         
         for i, stat in ipairs(stats) do
