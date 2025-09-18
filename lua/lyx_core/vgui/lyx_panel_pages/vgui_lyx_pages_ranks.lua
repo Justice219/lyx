@@ -10,8 +10,8 @@ function PANEL:Init()
     headerPanel:SetTall(lyx.Scale(60))
     headerPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), 0)
     headerPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
-        draw.SimpleText("Rank Management", "LYX.Ranks.Header", lyx.Scale(15), lyx.Scale(20), Color(255, 255, 255))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+        draw.SimpleText("Rank Management", "LYX.Ranks.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
     end
     
     -- Add rank button
@@ -66,19 +66,19 @@ function PANEL:RefreshRanks()
             rankPanel:DockMargin(0, lyx.Scale(5), lyx.Scale(10), 0)
             
             rankPanel.Paint = function(pnl, w, h)
-                draw.RoundedBox(6, 0, 0, w, h, Color(40, 40, 50, 200))
+                draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
                 
                 -- Rank color indicator
                 draw.RoundedBox(4, lyx.Scale(10), lyx.Scale(10), lyx.Scale(8), h - lyx.Scale(20), rankColor)
                 
                 -- Rank name
-                draw.SimpleText(rankName, "LYX.Ranks.Text", lyx.Scale(30), lyx.Scale(15), Color(255, 255, 255))
+                draw.SimpleText(rankName, "LYX.Ranks.Text", lyx.Scale(30), lyx.Scale(15), lyx.Colors.PrimaryText)
                 
                 -- User count
-                draw.SimpleText(userCount .. " users", "LYX.Ranks.Text", lyx.Scale(30), lyx.Scale(35), Color(180, 180, 180))
+                draw.SimpleText(userCount .. " users", "LYX.Ranks.Text", lyx.Scale(30), lyx.Scale(35), lyx.Colors.SecondaryText)
                 
                 -- Permissions
-                draw.SimpleText("Standard Permissions", "LYX.Ranks.Text", lyx.Scale(200), lyx.Scale(22), Color(150, 150, 150))
+                draw.SimpleText("Standard Permissions", "LYX.Ranks.Text", lyx.Scale(200), lyx.Scale(22), lyx.Colors.DisabledText)
             end
             
             -- Action buttons
@@ -317,7 +317,7 @@ function PANEL:ChangeUserRankDialog(ply)
 end
 
 function PANEL:Paint(w, h)
-    draw.RoundedBox(8, 0, 0, w, h, lyx.Colors.Background or Color(20, 20, 30))
+    draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
 end
 
 vgui.Register("LYX.Pages.Ranks", PANEL)

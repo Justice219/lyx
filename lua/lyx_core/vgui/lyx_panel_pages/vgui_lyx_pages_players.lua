@@ -10,8 +10,8 @@ function PANEL:Init()
     controlPanel:SetTall(lyx.Scale(60))
     controlPanel:DockMargin(lyx.Scale(10), lyx.Scale(10), lyx.Scale(10), 0)
     controlPanel.Paint = function(pnl, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(30, 30, 40, 200))
-        draw.SimpleText("Player Management", "LYX.Players.Header", lyx.Scale(15), lyx.Scale(20), Color(255, 255, 255))
+        draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Foreground)
+        draw.SimpleText("Player Management", "LYX.Players.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
     end
     
     -- Search box
@@ -196,7 +196,7 @@ function PANEL:OnRemove()
 end
 
 function PANEL:Paint(w, h)
-    draw.RoundedBox(8, 0, 0, w, h, lyx.Colors.Background or Color(20, 20, 30))
+    draw.RoundedBox(4, 0, 0, w, h, lyx.Colors.Background)
 end
 
 vgui.Register("LYX.Pages.Players", PANEL)
