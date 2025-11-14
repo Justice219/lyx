@@ -15,7 +15,7 @@ Secure client-server networking library with rate limiting and validation
 ]]--
 
 -- Network security configuration
-lyx.NET_MAX_MESSAGE_SIZE = 65536 -- 64KB max message size
+lyx.NET_MAX_MESSAGE_SIZE = 524288 -- 64KB max message size (len is in bits)
 lyx.NET_RATE_LIMIT_WINDOW = 1 -- Rate limit window in seconds
 lyx.NET_DEFAULT_RATE_LIMIT = 10 -- Default messages per window
 do
@@ -74,16 +74,28 @@ do
                 lyx.Logger:Log("Invalid network message name", 3)
                 return
             end
-            
-            if not tbl or type(tbl) ~= "table" or not tbl.func then
+
+            tbl = tbl or {}
+            if type(tbl) ~= "table" then
+                lyx.Logger:Log("Invalid network handler table for " .. name, 3)
+                return
+            end
+
+            local hasHandler = type(tbl.func) == "function"
+            if tbl.func ~= nil and not hasHandler then
                 lyx.Logger:Log("Invalid network handler for " .. name, 3)
                 return
             end
-            
-            -- Store message configuration
+
+            -- Store message configuration (for dashboards/telemetry)
             lyx.netMessages[name] = tbl
             util.AddNetworkString(name)
-            
+
+            if not hasHandler then
+                lyx.Logger:Log("Registered network message: " .. name .. " (no handler)")
+                return
+            end
+
             -- Register receiver immediately (no timer delay)
             net.Receive(name, function(len, ply)
                 -- Validate message size
@@ -163,26 +175,66 @@ do
         end
     end
     
+    -- Determine if a value looks like a net target (Player or player table)
+    local function IsNetTarget(value)
+        if value == nil then return false end
+        if IsValid and IsValid(value) and value:IsPlayer() then return true end
+        if type(value) ~= "table" then return false end
+
+        -- accept player arrays but ignore payload tables
+        local count = 0
+        for key, ply in pairs(value) do
+            if type(key) ~= "number" or not (IsValid and IsValid(ply)) or not ply:IsPlayer() then
+                return false
+            end
+            count = count + 1
+        end
+        return count > 0
+    end
+    
     --[[
         Send a network message with validation
+        Supports both callback writers and automatic payload packing when a value/table is provided.
         @param name string - Network message name
-        @param target any - Player/table of players (server) or nil (client)
-        @param writeFunc function - Function to write data to the message
+        @param arg2 any - Target, payload, or writer depending on usage
+        @param arg3 any - Optional target or writer
         @return boolean - True if sent successfully
     ]]
-    function lyx:NetSend(name, target, writeFunc)
+    function lyx:NetSend(name, arg2, arg3)
         if not name or type(name) ~= "string" then
             return false
+        end
+        
+        local target
+        local payload
+        local writeFunc
+        
+        if type(arg2) == "function" then
+            writeFunc = arg2
+        elseif type(arg3) == "function" then
+            target = arg2
+            writeFunc = arg3
+        elseif arg2 ~= nil and not IsNetTarget(arg2) then
+            payload = arg2
+            target = arg3
+        else
+            target = arg2
+            payload = arg3
         end
         
         -- Start the message
         net.Start(name)
         
-        -- Write data with error protection
-        if writeFunc and type(writeFunc) == "function" then
+        if writeFunc then
             local success, err = pcall(writeFunc)
             if not success then
                 lyx.Logger:Log("Error writing network message " .. name .. ": " .. tostring(err), 3)
+                return false
+            end
+        elseif payload ~= nil then
+            local success, err = pcall(net.WriteType, payload)
+            if not success then
+                lyx.Logger:Log("Error packing payload for " .. name .. ": " .. tostring(err), 3)
                 return false
             end
         end
@@ -203,6 +255,51 @@ do
         end
         
         return true
+    end
+end
+
+--[[
+    Simple receive helper for automatically packed payloads.
+    Calls the supplied callback with (ply, payload) where payload is decoded via net.ReadType.
+]]
+function lyx.NetReceive(name, callback)
+    if not name or type(name) ~= "string" then
+        if lyx.Logger then
+            lyx.Logger:Log("Invalid NetReceive name", 3)
+        end
+        return
+    end
+    
+    if type(callback) ~= "function" then
+        if lyx.Logger then
+            lyx.Logger:Log("Invalid NetReceive handler for " .. name, 3)
+        end
+        return
+    end
+    
+    net.Receive(name, function(len, ply)
+        local payload
+        
+        if len > 0 then
+            local success, data = pcall(net.ReadType)
+            if success then
+                payload = data
+            else
+                if lyx.Logger then
+                    lyx.Logger:Log("Failed to decode payload for " .. name .. ": " .. tostring(data), 3)
+                end
+                payload = nil
+            end
+        end
+        
+        local ok, err = pcall(callback, ply, payload)
+        if not ok and lyx.Logger then
+            lyx.Logger:Log("NetReceive handler error for " .. name .. ": " .. tostring(err), 3)
+        end
+    end)
+    
+    if lyx.Logger then
+        lyx.Logger:Log("Registered NetReceive handler: " .. name)
     end
 end
 
