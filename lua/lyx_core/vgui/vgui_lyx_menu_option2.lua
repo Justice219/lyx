@@ -23,7 +23,13 @@ function PANEL:Init()
     self.BackgroundCol = lyx.CopyColor(self.NormalCol)
 end
 
-function PANEL:SetIcon() end
+function PANEL:SetIcon(path)
+    if not path or path == "" then
+        self.IconMaterial = nil
+        return
+    end
+    self.IconMaterial = Material(path, "smooth")
+end
 
 function PANEL:SetSubMenu(menu)
     self.SubMenu = menu
@@ -56,7 +62,18 @@ function PANEL:Paint(w, h)
     surface.SetDrawColor(self.BackgroundCol)
     surface.DrawRect(0, 0, w, h)
 
-    lyx.DrawSimpleText(self:GetText(), self:GetFont(), lyx.Scale(14), h * 0.5, lyx.Colors.PrimaryText, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+    local textX = lyx.Scale(14)
+    if self.IconMaterial then
+        local iconSize = lyx.Scale(16)
+        local iconX = lyx.Scale(8)
+        local iconY = (h - iconSize) * 0.5
+        surface.SetMaterial(self.IconMaterial)
+        surface.SetDrawColor(255, 255, 255, self:IsEnabled() and 255 or 140)
+        surface.DrawTexturedRect(iconX, iconY, iconSize, iconSize)
+        textX = iconX + iconSize + lyx.Scale(6)
+    end
+
+    lyx.DrawSimpleText(self:GetText(), self:GetFont(), textX, h * 0.5, lyx.Colors.PrimaryText, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 
     if not self.SubMenu then return end
     local dropBtnSize = lyx.Scale(8)

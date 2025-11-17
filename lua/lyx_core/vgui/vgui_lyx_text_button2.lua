@@ -23,9 +23,29 @@ function PANEL:SizeToText()
     self:SetSize(lyx.GetTextSize(self:GetText()) + lyx.Scale(14), lyx.Scale(30))
 end
 
+function PANEL:SetIcon(iconPath)
+    if not iconPath or iconPath == "" then
+        self.IconMaterial = nil
+        return
+    end
+    self.IconMaterial = Material(iconPath, "smooth")
+end
+
 function PANEL:PaintExtra(w, h)
     local textAlign = self:GetTextAlign()
-    local textX = (textAlign == TEXT_ALIGN_CENTER and w * 0.5) or (textAlign == TEXT_ALIGN_RIGHT and w - self:GetTextSpacing()) or self:GetTextSpacing()
+    local spacing = self:GetTextSpacing()
+    local textX = (textAlign == TEXT_ALIGN_CENTER and w * 0.5) or (textAlign == TEXT_ALIGN_RIGHT and w - spacing) or spacing
+
+    if self.IconMaterial then
+        local iconSize = math.min(h - spacing * 2, lyx.Scale(24))
+        local iconX = spacing
+        local iconY = (h - iconSize) * 0.5
+        surface.SetMaterial(self.IconMaterial)
+        surface.SetDrawColor(255, 255, 255, self:IsEnabled() and 255 or 140)
+        surface.DrawTexturedRect(iconX, iconY, iconSize, iconSize)
+        textX = iconX + iconSize + spacing
+        textAlign = TEXT_ALIGN_LEFT
+    end
 
     if not self:IsEnabled() then
         lyx.DrawSimpleText(self:GetText(), self:GetFont(), textX, h * 0.5, lyx.Colors.DisabledText, textAlign, TEXT_ALIGN_CENTER)
