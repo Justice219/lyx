@@ -1,4 +1,5 @@
 local PANEL = {}
+local MAX_VISIBLE_LOGS = 200 -- cap rows to avoid UI lag/crashes
 
 lyx.RegisterFont("LYX.Logs.Header", "Open Sans SemiBold", lyx.Scale(18))
 lyx.RegisterFont("LYX.Logs.Text", "Open Sans", lyx.Scale(14))
@@ -7,6 +8,9 @@ function PANEL:Init()
     -- Store logs
     self.Logs = {}
     self.FilteredAddon = nil
+    self.MaxShownLogs = MAX_VISIBLE_LOGS
+    self.CurrentFilteredTotal = 0
+    self.CurrentDisplayedCount = 0
     
     local headerPanel = vgui.Create("DPanel", self)
     headerPanel:Dock(TOP)
@@ -17,8 +21,18 @@ function PANEL:Init()
         draw.SimpleText("System Logs", "LYX.Logs.Header", lyx.Scale(15), lyx.Scale(20), lyx.Colors.PrimaryText)
         
         -- Log count
-        local logCount = lyx.LogHistory and #lyx.LogHistory or #self.Logs
-        draw.SimpleText(logCount .. " entries", "LYX.Logs.Text", w - lyx.Scale(400), lyx.Scale(22), lyx.Colors.SecondaryText)
+        local totalLogs = self.CurrentFilteredTotal
+        if totalLogs == 0 and lyx.LogHistory then
+            totalLogs = #lyx.LogHistory
+        end
+        local visibleLogs = self.CurrentDisplayedCount
+        if visibleLogs == 0 and totalLogs > 0 then
+            visibleLogs = math.min(totalLogs, self.MaxShownLogs)
+        end
+        local countLabel = totalLogs > visibleLogs and
+            string.format("Showing %d of %d entries", visibleLogs, totalLogs) or
+            string.format("%d entries", totalLogs)
+        draw.SimpleText(countLabel, "LYX.Logs.Text", w - lyx.Scale(400), lyx.Scale(22), lyx.Colors.SecondaryText)
     end
     
     -- Filter by level dropdown
@@ -78,6 +92,8 @@ function PANEL:Init()
         self.LogList:Clear()
         lyx.LogHistory = {}
         self.Logs = {}
+        self.CurrentFilteredTotal = 0
+        self.CurrentDisplayedCount = 0
         notification.AddLegacy("Logs cleared!", NOTIFY_GENERIC, 3)
     end
     
@@ -195,36 +211,52 @@ end
 
 function PANEL:RefreshLogs()
     self.LogList:Clear()
+    self.CurrentDisplayedCount = 0
     
-    if not lyx.LogHistory then return end
+    if not lyx.LogHistory then
+        self.CurrentFilteredTotal = 0
+        return
+    end
     
-    local levelFilter = self.LevelFilter and self.LevelFilter:GetValue() or "All Levels"
-    local addonFilter = self.AddonFilter and self.AddonFilter:GetValue() or "All Addons"
-    
-    -- Add logs from history
+    local filteredLogs = {}
     for _, log in ipairs(lyx.LogHistory) do
-        local showLog = true
-        
-        -- Apply level filter
-        if levelFilter ~= "All Levels" and log.level ~= levelFilter then
-            showLog = false
-        end
-        
-        -- Apply addon filter
-        if addonFilter ~= "All Addons" and log.addon ~= addonFilter then
-            showLog = false
-        end
-        
-        if showLog then
-            self:AddLogEntry(log)
+        if self:MatchesFilters(log) then
+            table.insert(filteredLogs, log)
         end
     end
+    
+    self.CurrentFilteredTotal = #filteredLogs
+    if #filteredLogs == 0 then return end
+    
+    local maxLogs = self.MaxShownLogs or MAX_VISIBLE_LOGS
+    local startIndex = math.max(1, #filteredLogs - maxLogs + 1)
+    for i = startIndex, #filteredLogs do
+        self:AddLogEntry(filteredLogs[i], true)
+    end
+    self.CurrentDisplayedCount = math.min(#filteredLogs, maxLogs)
 end
 
-function PANEL:AddLogEntry(log)
-    if not log then return end
+function PANEL:MatchesFilters(log)
+    if not log then return false end
     
-    local timeStr = os.date("%H:%M:%S", log.time)
+    local levelFilter = self.LevelFilter and self.LevelFilter:GetValue() or "All Levels"
+    if levelFilter ~= "All Levels" and log.level ~= levelFilter then
+        return false
+    end
+    
+    local addonFilter = self.AddonFilter and self.AddonFilter:GetValue() or "All Addons"
+    if addonFilter ~= "All Addons" and log.addon ~= addonFilter then
+        return false
+    end
+    
+    return true
+end
+
+function PANEL:AddLogEntry(log, bypassFilter)
+    if not log then return end
+    if not bypassFilter and not self:MatchesFilters(log) then return end
+    
+    local timeStr = os.date("%H:%M:%S", log.time or os.time())
     
     -- Add to list with color
     self.LogList:AddRow(
@@ -234,6 +266,7 @@ function PANEL:AddLogEntry(log)
         log.message or "",
         log.color
     )
+    self:TrimLogRows()
     
     -- Auto-scroll to bottom
     if self.LogList.ScrollPanel then
@@ -246,6 +279,27 @@ function PANEL:AddLogEntry(log)
             end
         end)
     end
+end
+
+function PANEL:TrimLogRows()
+    if not IsValid(self.LogList) then return end
+    
+    local maxRows = self.MaxShownLogs or MAX_VISIBLE_LOGS
+    
+    while self.LogList:GetRowCount() > maxRows do
+        local oldestRow = table.remove(self.LogList.Rows, 1)
+        if IsValid(oldestRow) then
+            oldestRow:Remove()
+        end
+    end
+    
+    for idx, row in ipairs(self.LogList.Rows) do
+        row.Index = idx
+    end
+    
+    local rowHeight = lyx.Scale(35) + lyx.Scale(2)
+    self.LogList.RowContainer:SetTall(#self.LogList.Rows * rowHeight)
+    self.CurrentDisplayedCount = math.min(self.LogList:GetRowCount(), maxRows)
 end
 
 
