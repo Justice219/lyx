@@ -35,7 +35,7 @@ function PANEL:Paint(w, h)
     lyx.DrawSimpleText(self:GetName(), "UI.NavbarItem", w * 0.5, h * 0.5, self.TextCol, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 end
 
-vgui.Register("lyx.NavbarItem2", PANEL, "lyx.Button")
+vgui.Register("lyx.NavbarItem2", PANEL, "lyx.Button2")
 
 PANEL = {}
 

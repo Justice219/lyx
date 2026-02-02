@@ -27,7 +27,7 @@ function PANEL:Paint(w, h)
     lyx.DrawImgurRotated(w - h * .3 - lyx.Scale(4), h * 0.5, arrowSize, arrowSize, self.ArrowRotation, "30Bvuwi", lyx.Colors.PrimaryText)
 end
 
-vgui.Register("lyx.CategoryHeader2", PANEL, "lyx.Button")
+vgui.Register("lyx.CategoryHeader2", PANEL, "lyx.Button2")
 
 PANEL = {}
 

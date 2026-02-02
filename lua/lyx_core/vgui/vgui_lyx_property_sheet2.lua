@@ -69,7 +69,7 @@ function PANEL:Paint(w, h)
 	lyx.DrawSimpleText(self:GetText(), "UI.Tab", w * .5, h * .5, self.TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 end
 
-vgui.Register("lyx.Tab", PANEL, "lyx.Button")
+vgui.Register("lyx.Tab", PANEL, "lyx.Button2")
 
 
 PANEL = {}
