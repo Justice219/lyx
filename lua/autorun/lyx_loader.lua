@@ -33,13 +33,13 @@ do
         if CLIENT then return end
         include(str)
     end
-    
+
     local function loadClientFile(str)
         if SERVER then AddCSLuaFile(str) return end
         include(str)
         if DebugLoadedFile then print("Loaded: " .. str) end
     end
-    
+
     local function loadSharedFile(str)
         if SERVER then AddCSLuaFile(str) end
         include(str)
@@ -89,6 +89,12 @@ local folderOrder = {"thirdparty", "sh", "sv", "cl", "vgui"}
 for _, folderName in ipairs(folderOrder) do
     lyx.LoadDirectoryRecursive("lyx_core/" .. folderName)
 end
+
+-- Load LYXUI after lyx_core (uses lyx.* utilities)
+for _, folderName in ipairs(folderOrder) do
+    lyx.LoadDirectoryRecursive("lyxui/" .. folderName)
+end
+hook.Run("LYXUI.FullyLoaded")
 
 lyx.Loaded = true
 hook.Run("lyx.Loaded")
