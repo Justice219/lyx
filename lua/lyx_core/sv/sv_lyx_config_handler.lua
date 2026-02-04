@@ -81,13 +81,7 @@ end
 -- Apply debug mode
 lyx.configHandlers["debug_mode"] = function(value)
     if type(value) == "boolean" then
-        if value then
-            RunConsoleCommand("developer", "1")
-            lyx.debugMode = true
-        else
-            RunConsoleCommand("developer", "0")
-            lyx.debugMode = false
-        end
+        lyx.debugMode = value
         lyx.Logger:Log("Debug mode " .. (value and "enabled" or "disabled"))
     end
 end
@@ -282,14 +276,6 @@ hook.Add("Lyx.NetworkReceived", "Lyx.RateLimiting", function(ply, messageName)
     table.insert(requests, now)
 end)
 
--- Modify SetSetting to trigger handler
-local oldSetSetting = lyx.SetSetting
-function lyx:SetSetting(key, value)
-    local success = oldSetSetting(self, key, value)
-    if success then
-        hook.Run("Lyx.SettingChanged", key, value)
-    end
-    return success
-end
+-- Note: SetSetting in sv_lyx_setting.lua already fires the Lyx.SettingChanged hook
 
 lyx.Logger:Log("Config handler system loaded")
